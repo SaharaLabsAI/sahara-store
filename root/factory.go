@@ -6,14 +6,12 @@ import (
 
 	iavl_v2 "github.com/cosmos/iavl/v2"
 
-	"github.com/SaharaLabsAI/sahara-store/core/log"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store"
+	store "github.com/SaharaLabsAI/sahara-store"
 	"github.com/SaharaLabsAI/sahara-store/commitment"
-	"github.com/SaharaLabsAI/sahara-store/commitment/iavl"
 	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
 	"github.com/SaharaLabsAI/sahara-store/commitment/mem"
-	"github.com/SaharaLabsAI/sahara-store/db"
+	"github.com/SaharaLabsAI/sahara-store/core/log"
+	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	"github.com/SaharaLabsAI/sahara-store/internal"
 	"github.com/SaharaLabsAI/sahara-store/metrics"
 	"github.com/SaharaLabsAI/sahara-store/pruning"
@@ -34,7 +32,6 @@ const storePrefixTpl = "s/k:%s/" // s/k:<storeKey>
 type Options struct {
 	SCType          SCType               `mapstructure:"sc-type" toml:"sc-type" comment:"State commitment database type. Currently we support: \"iavl\" and \"iavl-v2\""`
 	SCPruningOption *store.PruningOption `mapstructure:"sc-pruning-option" toml:"sc-pruning-option" comment:"Pruning options for state commitment"`
-	IavlConfig      *iavl.Config         `mapstructure:"iavl-config" toml:"iavl-config"`
 	IavlV2Config    iavlv2.Config        `mapstructure:"iavl-v2-config" toml:"iavl-v2-config"`
 }
 
@@ -54,10 +51,6 @@ func DefaultStoreOptions() Options {
 		SCPruningOption: &store.PruningOption{
 			KeepRecent: 2,
 			Interval:   100,
-		},
-		IavlConfig: &iavl.Config{
-			CacheSize:              500_000,
-			SkipFastStorageUpgrade: true,
 		},
 	}
 }
@@ -102,7 +95,7 @@ func CreateRootStore(opts *FactoryOptions) (store.RootStore, error) {
 		} else {
 			switch scType {
 			case SCTypeIavl:
-				return iavl.NewIavlTree(db.NewPrefixDB(opts.SCRawDB, []byte(fmt.Sprintf(storePrefixTpl, key))), opts.Logger, storeOpts.IavlConfig), nil
+				return nil, errors.New("iavl support is removed")
 			case SCTypeIavlV2:
 				dir := fmt.Sprintf("%s/data/iavl-v2/%s", opts.RootDir, key)
 				return iavlv2.NewTree(opts.Options.IavlV2Config, iavl_v2.SqliteDbOptions{Path: dir}, opts.Logger)
