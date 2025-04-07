@@ -11,11 +11,11 @@ import (
 	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 
-	"cosmossdk.io/store/v2"
-	"cosmossdk.io/store/v2/metrics"
-	"cosmossdk.io/store/v2/migration"
-	"cosmossdk.io/store/v2/proof"
-	"cosmossdk.io/store/v2/pruning"
+	store "github.com/SaharaLabsAI/sahara-store"
+	"github.com/SaharaLabsAI/sahara-store/metrics"
+	"github.com/SaharaLabsAI/sahara-store/migration"
+	"github.com/SaharaLabsAI/sahara-store/proof"
+	"github.com/SaharaLabsAI/sahara-store/pruning"
 )
 
 var (

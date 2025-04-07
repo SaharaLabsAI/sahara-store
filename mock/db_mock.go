@@ -13,7 +13,7 @@ import (
 	reflect "reflect"
 
 	store "github.com/SaharaLabsAI/sahara-store/core/store"
-	proof "cosmossdk.io/store/v2/proof"
+	proof "github.com/SaharaLabsAI/sahara-store/proof"
 	gomock "go.uber.org/mock/gomock"
 )
 

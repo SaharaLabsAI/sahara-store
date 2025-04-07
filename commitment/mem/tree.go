@@ -3,8 +3,8 @@ package mem
 import (
 	ics23 "github.com/cosmos/ics23/go"
 
-	"cosmossdk.io/store/v2/commitment"
-	"cosmossdk.io/store/v2/db"
+	"github.com/SaharaLabsAI/sahara-store/commitment"
+	"github.com/SaharaLabsAI/sahara-store/db"
 )
 
 var _ commitment.Tree = (*Tree)(nil)

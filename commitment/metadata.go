@@ -6,9 +6,8 @@ import (
 	"fmt"
 
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-
-	"cosmossdk.io/store/v2/internal/encoding"
-	"cosmossdk.io/store/v2/proof"
+	"github.com/SaharaLabsAI/sahara-store/internal/encoding"
+	"github.com/SaharaLabsAI/sahara-store/proof"
 )
 
 const (

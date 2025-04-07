@@ -7,12 +7,12 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	corelog "cosmossdk.io/core/log"
-	corestore "cosmossdk.io/core/store"
-	coretesting "cosmossdk.io/core/testing"
-	"cosmossdk.io/store/v2/commitment"
-	dbm "cosmossdk.io/store/v2/db"
-	"cosmossdk.io/store/v2/metrics"
+	"github.com/SaharaLabsAI/sahara-store/commitment"
+	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
+	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
+	dbm "github.com/SaharaLabsAI/sahara-store/db"
+	"github.com/SaharaLabsAI/sahara-store/metrics"
 )
 
 func TestCommitterSuite(t *testing.T) {

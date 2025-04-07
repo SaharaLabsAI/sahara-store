@@ -15,9 +15,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
-
-	"cosmossdk.io/store/v2/snapshots"
-	snapshotstypes "cosmossdk.io/store/v2/snapshots/types"
+	"github.com/SaharaLabsAI/sahara-store/snapshots"
+	snapshotstypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
 )
 
 func checksums(slice [][]byte) [][]byte {

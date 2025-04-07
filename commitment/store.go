@@ -12,16 +12,15 @@ import (
 	protoio "github.com/cosmos/gogoproto/io"
 	"golang.org/x/sync/errgroup"
 
+	store "github.com/SaharaLabsAI/sahara-store"
 	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-
-	"cosmossdk.io/store/v2"
-	"cosmossdk.io/store/v2/internal"
-	"cosmossdk.io/store/v2/internal/conv"
-	"cosmossdk.io/store/v2/metrics"
-	"cosmossdk.io/store/v2/proof"
-	"cosmossdk.io/store/v2/snapshots"
-	snapshotstypes "cosmossdk.io/store/v2/snapshots/types"
+	"github.com/SaharaLabsAI/sahara-store/internal"
+	"github.com/SaharaLabsAI/sahara-store/internal/conv"
+	"github.com/SaharaLabsAI/sahara-store/metrics"
+	"github.com/SaharaLabsAI/sahara-store/proof"
+	"github.com/SaharaLabsAI/sahara-store/snapshots"
+	snapshotstypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
 )
 
 var (

@@ -6,10 +6,10 @@ import (
 	"github.com/cosmos/iavl"
 	ics23 "github.com/cosmos/ics23/go"
 
-	"cosmossdk.io/core/log"
-	corestore "cosmossdk.io/core/store"
-	"cosmossdk.io/store/v2"
-	"cosmossdk.io/store/v2/commitment"
+	store "github.com/SaharaLabsAI/sahara-store"
+	"github.com/SaharaLabsAI/sahara-store/commitment"
+	"github.com/SaharaLabsAI/sahara-store/core/log"
+	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 )
 
 var (

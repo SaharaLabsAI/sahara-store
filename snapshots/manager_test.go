@@ -9,9 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
-
-	"cosmossdk.io/store/v2/snapshots"
-	"cosmossdk.io/store/v2/snapshots/types"
+	"github.com/SaharaLabsAI/sahara-store/snapshots"
+	"github.com/SaharaLabsAI/sahara-store/snapshots/types"
 )
 
 var opts = snapshots.NewSnapshotOptions(1500, 2)

@@ -7,15 +7,14 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	store "github.com/SaharaLabsAI/sahara-store"
 	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
-
-	"cosmossdk.io/store/v2"
-	dbm "cosmossdk.io/store/v2/db"
-	"cosmossdk.io/store/v2/proof"
-	"cosmossdk.io/store/v2/snapshots"
-	snapshotstypes "cosmossdk.io/store/v2/snapshots/types"
+	dbm "github.com/SaharaLabsAI/sahara-store/db"
+	"github.com/SaharaLabsAI/sahara-store/proof"
+	"github.com/SaharaLabsAI/sahara-store/snapshots"
+	snapshotstypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
 )
 
 const (

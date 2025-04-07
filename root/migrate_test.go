@@ -7,19 +7,19 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	store "github.com/SaharaLabsAI/sahara-store"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
 
 	"cosmossdk.io/log"
 
-	"cosmossdk.io/store/v2"
-	"cosmossdk.io/store/v2/commitment"
-	"cosmossdk.io/store/v2/commitment/iavl"
-	dbm "cosmossdk.io/store/v2/db"
-	"cosmossdk.io/store/v2/metrics"
-	"cosmossdk.io/store/v2/migration"
-	"cosmossdk.io/store/v2/pruning"
-	"cosmossdk.io/store/v2/snapshots"
+	"github.com/SaharaLabsAI/sahara-store/commitment"
+	"github.com/SaharaLabsAI/sahara-store/commitment/iavl"
+	dbm "github.com/SaharaLabsAI/sahara-store/db"
+	"github.com/SaharaLabsAI/sahara-store/metrics"
+	"github.com/SaharaLabsAI/sahara-store/migration"
+	"github.com/SaharaLabsAI/sahara-store/pruning"
+	"github.com/SaharaLabsAI/sahara-store/snapshots"
 )
 
 var storeKeys = []string{"store1", "store2", "store3"}

@@ -1,7 +1,7 @@
 package pruning
 
 import (
-	"cosmossdk.io/store/v2"
+	"github.com/SaharaLabsAI/sahara-store"
 )
 
 // Manager is a struct that manages the pruning of old versions of the SC and SS.

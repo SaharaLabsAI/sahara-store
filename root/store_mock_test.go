@@ -10,10 +10,10 @@ import (
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
 
-	"cosmossdk.io/store/v2"
-	"cosmossdk.io/store/v2/metrics"
-	"cosmossdk.io/store/v2/mock"
-	"cosmossdk.io/store/v2/pruning"
+	store "github.com/SaharaLabsAI/sahara-store"
+	"github.com/SaharaLabsAI/sahara-store/metrics"
+	"github.com/SaharaLabsAI/sahara-store/mock"
+	"github.com/SaharaLabsAI/sahara-store/pruning"
 )
 
 func newTestRootStore(sc store.Committer) *Store {

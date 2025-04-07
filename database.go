@@ -4,7 +4,7 @@ import (
 	"io"
 
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"cosmossdk.io/store/v2/proof"
+	"github.com/SaharaLabsAI/sahara-store/proof"
 )
 
 type VersionedReader interface {

@@ -9,7 +9,7 @@ import (
 	"github.com/google/btree"
 
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"cosmossdk.io/store/v2/errors"
+	"github.com/SaharaLabsAI/sahara-store/errors"
 )
 
 const (

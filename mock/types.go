@@ -1,6 +1,6 @@
 package mock
 
-import "cosmossdk.io/store/v2"
+import "github.com/SaharaLabsAI/sahara-store"
 
 // StateCommitter is a mock of store.Committer
 type StateCommitter interface {
