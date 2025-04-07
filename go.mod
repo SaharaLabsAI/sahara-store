@@ -17,7 +17,6 @@ require (
 	github.com/cockroachdb/pebble v1.1.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/gogoproto v1.7.0
-	github.com/cosmos/iavl v1.3.4
 	github.com/cosmos/iavl/v2 v2.0.0-alpha.4
 	github.com/cosmos/ics23/go v0.11.0
 	github.com/google/btree v1.1.3
@@ -31,7 +30,6 @@ require (
 )
 
 require (
-	cosmossdk.io/core v0.12.1-0.20240725072823-6a2d039e1212 // indirect
 	cosmossdk.io/schema v1.0.0 // indirect
 	github.com/DataDog/zstd v1.5.5 // indirect
 	github.com/aybabtme/uniplot v0.0.0-20151203143629-039c559e5e7e // indirect
