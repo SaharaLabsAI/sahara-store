@@ -16,7 +16,7 @@ import (
 
 	coreserver "github.com/SaharaLabsAI/sahara-store/core/server"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	storeerrors "cosmossdk.io/store/v2/errors"
+	storeerrors "github.com/SaharaLabsAI/sahara-store/errors"
 )
 
 var _ corestore.KVStoreWithBatch = (*GoLevelDB)(nil)

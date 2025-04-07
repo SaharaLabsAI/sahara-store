@@ -2,7 +2,7 @@ package root
 
 import (
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"cosmossdk.io/store/v2"
+	"github.com/SaharaLabsAI/sahara-store"
 )
 
 var (

@@ -11,9 +11,9 @@ import (
 
 	"github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"cosmossdk.io/store/v2/commitment"
-	"cosmossdk.io/store/v2/internal/encoding"
-	"cosmossdk.io/store/v2/snapshots"
+	"github.com/SaharaLabsAI/sahara-store/commitment"
+	"github.com/SaharaLabsAI/sahara-store/internal/encoding"
+	"github.com/SaharaLabsAI/sahara-store/snapshots"
 )
 
 const (

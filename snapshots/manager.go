@@ -13,8 +13,8 @@ import (
 
 	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
 	errorsmod "cosmossdk.io/errors/v2"
-	storeerrors "cosmossdk.io/store/v2/errors"
-	"cosmossdk.io/store/v2/snapshots/types"
+	storeerrors "github.com/SaharaLabsAI/sahara-store/errors"
+	"github.com/SaharaLabsAI/sahara-store/snapshots/types"
 )
 
 // Manager manages snapshot and restore operations for an app, making sure only a single

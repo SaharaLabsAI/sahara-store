@@ -8,7 +8,7 @@ import (
 
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
-	"cosmossdk.io/store/v2/db"
+	"github.com/SaharaLabsAI/sahara-store/db"
 )
 
 func TestFactory(t *testing.T) {

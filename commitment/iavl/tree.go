@@ -9,8 +9,8 @@ import (
 
 	"github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"cosmossdk.io/store/v2"
-	"cosmossdk.io/store/v2/commitment"
+	"github.com/SaharaLabsAI/sahara-store"
+	"github.com/SaharaLabsAI/sahara-store/commitment"
 )
 
 var (

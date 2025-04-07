@@ -10,12 +10,12 @@ import (
 
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
-	"cosmossdk.io/store/v2"
-	"cosmossdk.io/store/v2/commitment"
-	"cosmossdk.io/store/v2/commitment/iavl"
-	dbm "cosmossdk.io/store/v2/db"
-	"cosmossdk.io/store/v2/proof"
-	"cosmossdk.io/store/v2/pruning"
+	"github.com/SaharaLabsAI/sahara-store"
+	"github.com/SaharaLabsAI/sahara-store/commitment"
+	"github.com/SaharaLabsAI/sahara-store/commitment/iavl"
+	dbm "github.com/SaharaLabsAI/sahara-store/db"
+	"github.com/SaharaLabsAI/sahara-store/proof"
+	"github.com/SaharaLabsAI/sahara-store/pruning"
 )
 
 const (

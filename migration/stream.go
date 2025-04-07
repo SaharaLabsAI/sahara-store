@@ -8,8 +8,8 @@ import (
 	protoio "github.com/cosmos/gogoproto/io"
 	"github.com/cosmos/gogoproto/proto"
 
-	"cosmossdk.io/store/v2/snapshots"
-	snapshotstypes "cosmossdk.io/store/v2/snapshots/types"
+	"github.com/SaharaLabsAI/sahara-store/snapshots"
+	snapshotstypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
 )
 
 var (

@@ -10,7 +10,7 @@ import (
 
 	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"cosmossdk.io/store/v2/commitment"
+	"github.com/SaharaLabsAI/sahara-store/commitment"
 )
 
 func TestCommitterSuite(t *testing.T) {
