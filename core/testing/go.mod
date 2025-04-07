@@ -7,7 +7,7 @@ toolchain go1.23.4
 replace github.com/SaharaLabsAI/sahara-store/core => ../../core
 
 require (
-	github.com/SaharaLabsAI/sahara-store/core v0.0.0
+	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250407062141-814bf96c38f8
 	github.com/cosmos/gogoproto v1.7.0
 	github.com/tidwall/btree v1.7.0
 	go.uber.org/mock v0.5.0
