@@ -5,7 +5,9 @@ import (
 	"path/filepath"
 
 	"cosmossdk.io/log"
-	"github.com/SaharaLabsAI/sahara-store"
+
+	store "github.com/SaharaLabsAI/sahara-store"
+	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	"github.com/SaharaLabsAI/sahara-store/db"
 )
 
@@ -21,6 +23,8 @@ import (
 type Builder interface {
 	// Build creates a new store/v2 RootStore from the given Config.
 	Build(log.Logger, *Config) (store.RootStore, error)
+
+	BuildWithDB(logger log.Logger, scRawDb corestore.KVStoreWithBatch, config *Config) (store.RootStore, error)
 	// RegisterKey registers a store key (namespace) to be used when building the RootStore.
 	RegisterKey(string)
 	// Get returns the Store.  Build should be called before calling Get or the result will be nil.
@@ -70,6 +74,10 @@ func (sb *builder) Build(
 		return nil, fmt.Errorf("failed to create SCRawDB: %w", err)
 	}
 
+	return sb.BuildWithDB(logger, scRawDb, config)
+}
+
+func (sb *builder) BuildWithDB(logger log.Logger, scRawDb corestore.KVStoreWithBatch, config *Config) (store.RootStore, error) {
 	var storeKeys []string
 	for key := range sb.storeKeys {
 		storeKeys = append(storeKeys, key)
@@ -87,6 +95,7 @@ func (sb *builder) Build(
 	if err != nil {
 		return nil, fmt.Errorf("failed to create root store: %w", err)
 	}
+
 	sb.store = rs
 	return sb.store, nil
 }
