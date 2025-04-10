@@ -343,11 +343,11 @@ func (c *CommitStore) GetProof(storeKey []byte, version uint64, key []byte) ([]p
 	return []proof.CommitmentOp{commitOp, *storeCommitmentOp}, nil
 }
 
-// getReader returns a reader for the given store key. It will return an error if the
+// GetReader returns a reader for the given store key. It will return an error if the
 // store key does not exist or the tree does not implement the Reader interface.
 // WARNING: This function is only used during the migration process. The SC layer
 // generally does not provide a reader for the CommitStore.
-func (c *CommitStore) getReader(storeKey string) (Reader, error) {
+func (c *CommitStore) GetReader(storeKey string) (Reader, error) {
 	var tree Tree
 	if storeTree, ok := c.oldTrees[storeKey]; ok {
 		tree = storeTree
@@ -381,7 +381,7 @@ func (c *CommitStore) VersionExists(version uint64) (bool, error) {
 
 // Get implements store.VersionedReader.
 func (c *CommitStore) Get(storeKey []byte, version uint64, key []byte) ([]byte, error) {
-	reader, err := c.getReader(conv.UnsafeBytesToStr(storeKey))
+	reader, err := c.GetReader(conv.UnsafeBytesToStr(storeKey))
 	if err != nil {
 		return nil, err
 	}
@@ -402,7 +402,7 @@ func (c *CommitStore) Has(storeKey []byte, version uint64, key []byte) (bool, er
 
 // Iterator implements store.VersionedReader.
 func (c *CommitStore) Iterator(storeKey []byte, version uint64, start, end []byte) (corestore.Iterator, error) {
-	reader, err := c.getReader(conv.UnsafeBytesToStr(storeKey))
+	reader, err := c.GetReader(conv.UnsafeBytesToStr(storeKey))
 	if err != nil {
 		return nil, err
 	}
@@ -412,7 +412,7 @@ func (c *CommitStore) Iterator(storeKey []byte, version uint64, start, end []byt
 
 // ReverseIterator implements store.VersionedReader.
 func (c *CommitStore) ReverseIterator(storeKey []byte, version uint64, start, end []byte) (corestore.Iterator, error) {
-	reader, err := c.getReader(conv.UnsafeBytesToStr(storeKey))
+	reader, err := c.GetReader(conv.UnsafeBytesToStr(storeKey))
 	if err != nil {
 		return nil, err
 	}
