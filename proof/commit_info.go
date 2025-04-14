@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"cosmossdk.io/store/v2/internal/encoding"
+	"github.com/SaharaLabsAI/sahara-store/internal/encoding"
 )
 
 type (
