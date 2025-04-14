@@ -25,16 +25,16 @@ func (e *Exporter) Next() (*snapshotstypes.SnapshotIAVLItem, error) {
 	}
 
 	return &snapshotstypes.SnapshotIAVLItem{
-		Key:     item.Key(),
-		Value:   item.Value(),
-		Version: item.Version(),
-		Height:  int32(item.Height()),
+		Key:     item.Key,
+		Value:   item.Value,
+		Version: item.Version,
+		Height:  int32(item.Height),
 	}, nil
 }
 
 // Close closes the exporter.
 func (e *Exporter) Close() error {
-	return e.exporter.Close()
+	return nil
 }
 
 type Importer struct {

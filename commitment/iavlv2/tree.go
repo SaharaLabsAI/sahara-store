@@ -10,7 +10,6 @@ import (
 	"github.com/SaharaLabsAI/sahara-store/commitment"
 	"github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store/metrics"
 )
 
 var (
@@ -30,7 +29,7 @@ func NewTree(
 	dbOptions iavl.SqliteDbOptions,
 	log log.Logger,
 ) (*Tree, error) {
-	pool := iavl.NewSyncNodePool(&metrics.Metrics{})
+	pool := iavl.NewNodePool()
 	sql, err := iavl.NewSqliteDb(pool, dbOptions)
 	if err != nil {
 		return nil, err
