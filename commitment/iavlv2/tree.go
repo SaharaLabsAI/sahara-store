@@ -192,6 +192,10 @@ func (t *Tree) WorkingHash() []byte {
 	return t.tree.Hash()
 }
 
+func (t *Tree) StagedHash() []byte {
+	return t.tree.StagedHash()
+}
+
 func isHighBitSet(version uint64) error {
 	if version&(1<<63) != 0 {
 		return fmt.Errorf("%d too large; uint64 with the highest bit set are not supported", version)

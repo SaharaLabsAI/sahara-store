@@ -82,6 +82,7 @@ func (c *CommitStore) WriteChangeset(cs *corestore.Changeset) error {
 	eg.SetLimit(store.MaxWriteParallelism)
 	for _, pairs := range cs.Changes {
 		key := conv.UnsafeBytesToStr(pairs.Actor)
+		c.logger.Error("write store change set", "store", key, "change len", len(pairs.StateChanges))
 
 		tree, ok := c.multiTrees[key]
 		if !ok {
