@@ -153,7 +153,7 @@ func (t *Tree) Export(version uint64) (commitment.Exporter, error) {
 	if err := isHighBitSet(version); err != nil {
 		return nil, err
 	}
-	e, err := t.tree.Export(int64(version), iavl.PostOrder)
+	e, err := t.tree.ExportVersion(int64(version), iavl.PostOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -188,11 +188,8 @@ func (t *Tree) IsConcurrentSafe() bool {
 }
 
 func (t *Tree) WorkingHash() []byte {
-	return t.tree.Hash()
-}
-
-func (t *Tree) StagedHash() []byte {
-	return t.tree.StagedHash()
+	// return t.tree.Hash()
+	return t.tree.WorkingHash()
 }
 
 func isHighBitSet(version uint64) error {
@@ -204,14 +201,8 @@ func isHighBitSet(version uint64) error {
 
 func DefaultOptions(keepVersions int64) iavl.TreeOptions {
 	opts := iavl.DefaultTreeOptions()
-	opts.MinimumKeepVersions = keepVersions
 	opts.CheckpointInterval = 100
-	opts.PruneRatio = 1
 	opts.HeightFilter = 1
 	opts.EvictionDepth = 22
 	return opts
-}
-
-func SetGlobalPruneLimit(limit int) {
-	iavl.SetGlobalPruneLimit(limit)
 }
