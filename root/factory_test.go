@@ -9,6 +9,8 @@ import (
 	"github.com/SaharaLabsAI/sahara-store/db"
 )
 
+var storeKeys = []string{"store1", "store2", "store3"}
+
 func TestFactory(t *testing.T) {
 	fop := FactoryOptions{
 		Logger:    coretesting.NewNopLogger(),

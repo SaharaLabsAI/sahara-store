@@ -46,7 +46,7 @@ type FactoryOptions struct {
 // DefaultStoreOptions returns the default options for creating a root store.
 func DefaultStoreOptions() Options {
 	return Options{
-		SCType: SCTypeIavl,
+		SCType: SCTypeIavlV2,
 		SCPruningOption: &store.PruningOption{
 			KeepRecent: 2,
 			Interval:   100,
