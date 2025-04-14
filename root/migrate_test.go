@@ -9,12 +9,17 @@ import (
 
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
+
 	"cosmossdk.io/log"
+
 	"cosmossdk.io/store/v2"
 	"cosmossdk.io/store/v2/commitment"
 	"cosmossdk.io/store/v2/commitment/iavl"
 	dbm "cosmossdk.io/store/v2/db"
+	"cosmossdk.io/store/v2/metrics"
+	"cosmossdk.io/store/v2/migration"
 	"cosmossdk.io/store/v2/pruning"
+	"cosmossdk.io/store/v2/snapshots"
 )
 
 var storeKeys = []string{"store1", "store2", "store3"}
@@ -32,6 +37,7 @@ func TestMigrateStoreTestSuite(t *testing.T) {
 func (s *MigrateStoreTestSuite) SetupTest() {
 	testLog := log.NewTestLogger(s.T())
 	nopLog := coretesting.NewNopLogger()
+	nopMetrics := metrics.NoOpMetrics{}
 
 	mdb := dbm.NewMemDB()
 	multiTrees := make(map[string]commitment.Tree)
@@ -39,7 +45,7 @@ func (s *MigrateStoreTestSuite) SetupTest() {
 		prefixDB := dbm.NewPrefixDB(mdb, []byte(storeKey))
 		multiTrees[storeKey] = iavl.NewIavlTree(prefixDB, nopLog, iavl.DefaultConfig())
 	}
-	orgSC, err := commitment.NewCommitStore(multiTrees, nil, mdb, testLog)
+	orgSC, err := commitment.NewCommitStore(multiTrees, nil, mdb, testLog, nopMetrics)
 	s.Require().NoError(err)
 
 	// apply changeset against the original store
@@ -61,13 +67,17 @@ func (s *MigrateStoreTestSuite) SetupTest() {
 	for _, storeKey := range storeKeys {
 		multiTrees1[storeKey] = iavl.NewIavlTree(dbm.NewMemDB(), nopLog, iavl.DefaultConfig())
 	}
-	sc, err := commitment.NewCommitStore(multiTrees1, nil, dbm.NewMemDB(), testLog)
+	sc, err := commitment.NewCommitStore(multiTrees1, nil, dbm.NewMemDB(), testLog, nopMetrics)
 	s.Require().NoError(err)
 
+	snapshotsStore, err := snapshots.NewStore(s.T().TempDir())
+	s.Require().NoError(err)
+	snapshotManager := snapshots.NewManager(snapshotsStore, snapshots.NewSnapshotOptions(1500, 2), orgSC, nil, testLog)
+	migrationManager := migration.NewManager(dbm.NewMemDB(), snapshotManager, sc, testLog)
 	pm := pruning.NewManager(sc, nil)
 
 	// assume no storage store, simulate the migration process
-	s.rootStore, err = New(dbm.NewMemDB(), testLog, orgSC, pm, nil)
+	s.rootStore, err = New(dbm.NewMemDB(), testLog, orgSC, pm, migrationManager, nil)
 	s.Require().NoError(err)
 }
 

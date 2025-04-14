@@ -10,10 +10,12 @@ import (
 
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
+
 	"cosmossdk.io/store/v2"
 	"cosmossdk.io/store/v2/commitment"
 	"cosmossdk.io/store/v2/commitment/iavl"
 	dbm "cosmossdk.io/store/v2/db"
+	"cosmossdk.io/store/v2/metrics"
 )
 
 var storeKeys = []string{"store1", "store2", "store3"}
@@ -39,7 +41,7 @@ func (s *PruningManagerTestSuite) SetupTest() {
 		prefixDB := dbm.NewPrefixDB(mdb, []byte(storeKey))
 		multiTrees[storeKey] = iavl.NewIavlTree(prefixDB, nopLog, iavl.DefaultConfig())
 	}
-	s.sc, err = commitment.NewCommitStore(multiTrees, nil, mdb, nopLog)
+	s.sc, err = commitment.NewCommitStore(multiTrees, nil, mdb, nopLog, metrics.NewNoOpMetrics())
 	s.Require().NoError(err)
 
 	scPruningOption := store.NewPruningOptionWithCustom(0, 1) // prune all

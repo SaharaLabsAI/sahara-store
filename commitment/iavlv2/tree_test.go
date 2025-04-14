@@ -10,7 +10,9 @@ import (
 
 	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+
 	"cosmossdk.io/store/v2/commitment"
+	"cosmossdk.io/store/v2/metrics"
 )
 
 func TestCommitterSuite(t *testing.T) {
@@ -25,7 +27,7 @@ func TestCommitterSuite(t *testing.T) {
 			multiTrees := make(map[string]commitment.Tree)
 			mountTreeFn := func(storeKey string) (commitment.Tree, error) {
 				path := fmt.Sprintf("%s/%s", dbDir, storeKey)
-				tree, err := NewTree(DefaultConfig(), iavl.SqliteDbOptions{Path: path}, logger)
+				tree, err := NewTree(iavl.DefaultTreeOptions(), iavl.SqliteDbOptions{Path: path}, logger)
 				require.NoError(t, err)
 				return tree, nil
 			}
@@ -37,7 +39,7 @@ func TestCommitterSuite(t *testing.T) {
 				oldTrees[storeKey], _ = mountTreeFn(storeKey)
 			}
 
-			return commitment.NewCommitStore(multiTrees, oldTrees, db, logger)
+			return commitment.NewCommitStore(multiTrees, oldTrees, db, logger, metrics.NewNoOpMetrics())
 		},
 	}
 

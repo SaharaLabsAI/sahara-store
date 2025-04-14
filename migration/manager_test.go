@@ -9,9 +9,11 @@ import (
 
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
+
 	"cosmossdk.io/store/v2/commitment"
 	"cosmossdk.io/store/v2/commitment/iavl"
 	dbm "cosmossdk.io/store/v2/db"
+	"cosmossdk.io/store/v2/metrics"
 	"cosmossdk.io/store/v2/snapshots"
 )
 
@@ -26,7 +28,7 @@ func setupMigrationManager(t *testing.T) (*Manager, *commitment.CommitStore) {
 		prefixDB := dbm.NewPrefixDB(db, []byte(storeKey))
 		multiTrees[storeKey] = iavl.NewIavlTree(prefixDB, coretesting.NewNopLogger(), iavl.DefaultConfig())
 	}
-	commitStore, err := commitment.NewCommitStore(multiTrees, nil, db, coretesting.NewNopLogger())
+	commitStore, err := commitment.NewCommitStore(multiTrees, nil, db, coretesting.NewNopLogger(), metrics.NewNoOpMetrics())
 	require.NoError(t, err)
 
 	snapshotsStore, err := snapshots.NewStore(t.TempDir())
@@ -41,7 +43,7 @@ func setupMigrationManager(t *testing.T) (*Manager, *commitment.CommitStore) {
 		multiTrees1[storeKey] = iavl.NewIavlTree(prefixDB, coretesting.NewNopLogger(), iavl.DefaultConfig())
 	}
 
-	newCommitStore, err := commitment.NewCommitStore(multiTrees1, nil, db1, coretesting.NewNopLogger()) // for store/v2
+	newCommitStore, err := commitment.NewCommitStore(multiTrees1, nil, db1, coretesting.NewNopLogger(), metrics.NewNoOpMetrics()) // for store/v2
 	require.NoError(t, err)
 
 	return NewManager(db, snapshotsManager, newCommitStore, coretesting.NewNopLogger()), commitStore
@@ -70,6 +72,7 @@ func TestMigrateState(t *testing.T) {
 	// expecting error for conflicting process, since Migrate trigger snapshotter create migration,
 	// which start a snapshot process already.
 	_, err = m.snapshotsManager.Create(toVersion - 1)
+	fmt.Println(1)
 	require.Error(t, err)
 
 	// check the migrated state

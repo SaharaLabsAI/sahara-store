@@ -5,7 +5,6 @@ import (
 
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 
-	"cosmossdk.io/store/v2/metrics"
 	"cosmossdk.io/store/v2/proof"
 )
 
@@ -55,9 +54,6 @@ type RootStore interface {
 
 	// LastCommitID returns a CommitID pertaining to the last commitment.
 	LastCommitID() (proof.CommitID, error)
-
-	// SetMetrics sets the telemetry handler on the RootStore.
-	SetMetrics(m metrics.Metrics)
 
 	io.Closer
 }

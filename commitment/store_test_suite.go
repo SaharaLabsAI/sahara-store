@@ -1,15 +1,16 @@
 package commitment
 
 import (
+	"bytes"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/stretchr/testify/suite"
 
 	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
+
 	"cosmossdk.io/store/v2"
 	dbm "cosmossdk.io/store/v2/db"
 	"cosmossdk.io/store/v2/proof"
@@ -134,7 +135,7 @@ func (s *CommitStoreTestSuite) TestStore_Snapshotter() {
 	for _, storeInfo := range targetCommitInfo.StoreInfos {
 		matched := false
 		for _, latestStoreInfo := range cInfo.StoreInfos {
-			if strings.EqualFold(storeInfo.Name, latestStoreInfo.Name) {
+			if bytes.Equal(storeInfo.Name, latestStoreInfo.Name) {
 				s.Require().Equal(latestStoreInfo.GetHash(), storeInfo.GetHash())
 				matched = true
 			}
@@ -176,7 +177,7 @@ func (s *CommitStoreTestSuite) TestStore_LoadVersion() {
 	for i := uint64(1); i <= latestVersion; i++ {
 		commitInfo, _ := targetStore.GetCommitInfo(i)
 		s.Require().NotNil(commitInfo)
-		s.Require().Equal(i, uint64(commitInfo.Version))
+		s.Require().Equal(i, commitInfo.Version)
 	}
 
 	// rollback to a previous version

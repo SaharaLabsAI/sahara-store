@@ -3,11 +3,10 @@ package root
 import (
 	"testing"
 
-	gogotypes "github.com/cosmos/gogoproto/types"
 	"github.com/stretchr/testify/require"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
+
 	"cosmossdk.io/store/v2/db"
 )
 
@@ -28,18 +27,4 @@ func TestFactory(t *testing.T) {
 	f, err = CreateRootStore(&fop)
 	require.NoError(t, err)
 	require.NotNil(t, f)
-
-	require.NoError(t, setLatestVersion(fop.SCRawDB, 1))
-	fop.Options.SCType = SCTypeIavl
-	f, err = CreateRootStore(&fop)
-	require.NoError(t, err)
-	require.NotNil(t, f)
-}
-
-func setLatestVersion(db corestore.KVStoreWithBatch, version int64) error {
-	bz, err := gogotypes.StdInt64Marshal(version)
-	if err != nil {
-		panic(err)
-	}
-	return db.Set([]byte("s/latest"), bz)
 }

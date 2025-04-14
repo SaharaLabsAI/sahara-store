@@ -11,6 +11,7 @@ import (
 
 	"github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+
 	"cosmossdk.io/store/v2/commitment"
 	"cosmossdk.io/store/v2/internal/encoding"
 	"cosmossdk.io/store/v2/snapshots"
@@ -200,8 +201,11 @@ func (m *Manager) Sync() error {
 }
 
 // Close closes the manager. It should be called after the migration is done.
-// It will notify the snapshotsManager that the migration is done.
+// It will close the db and notify the snapshotsManager that the migration is done.
 func (m *Manager) Close() error {
+	if err := m.db.Close(); err != nil {
+		return fmt.Errorf("failed to close db: %w", err)
+	}
 	if m.stateCommitment != nil {
 		m.snapshotsManager.EndMigration(m.stateCommitment)
 	}

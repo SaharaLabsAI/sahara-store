@@ -17,7 +17,9 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+
 	"cosmossdk.io/errors/v2"
+
 	storeerrors "cosmossdk.io/store/v2/errors"
 	"cosmossdk.io/store/v2/snapshots/types"
 )
@@ -172,15 +174,14 @@ func (s *Store) Load(height uint64, format uint32) (*types.Snapshot, <-chan io.R
 				_ = pw.CloseWithError(err)
 				return
 			}
-			func() {
-				defer chunk.Close()
-				_, err = io.Copy(pw, chunk)
-				if err != nil {
-					_ = pw.CloseWithError(err)
-					return
-				}
-				pw.Close()
-			}()
+			defer chunk.Close()
+			_, err = io.Copy(pw, chunk)
+			if err != nil {
+				_ = pw.CloseWithError(err)
+				return
+			}
+			chunk.Close()
+			pw.Close()
 		}
 	}()
 
@@ -298,28 +299,27 @@ func (s *Store) Save(
 // saveChunk saves the given chunkBody with the given index to its appropriate path on disk.
 // The hash of the chunk is appended to the snapshot's metadata,
 // and the overall snapshot hash is updated with the chunk content too.
-func (s *Store) saveChunk(chunkBody io.ReadCloser, index uint32, snapshot *types.Snapshot, chunkHasher, snapshotHasher hash.Hash) (err error) {
-	defer func() {
-		if cErr := chunkBody.Close(); cErr != nil {
-			err = errors.Wrapf(cErr, "failed to close snapshot chunk body %d", index)
-		}
-	}()
+func (s *Store) saveChunk(chunkBody io.ReadCloser, index uint32, snapshot *types.Snapshot, chunkHasher, snapshotHasher hash.Hash) error {
+	defer chunkBody.Close()
 
 	path := s.PathChunk(snapshot.Height, snapshot.Format, index)
 	chunkFile, err := os.Create(path)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create snapshot chunk file %q", path)
 	}
-
-	defer func() {
-		if cErr := chunkFile.Close(); cErr != nil {
-			err = errors.Wrapf(cErr, "failed to close snapshot chunk file %d", index)
-		}
-	}()
+	defer chunkFile.Close()
 
 	chunkHasher.Reset()
 	if _, err := io.Copy(io.MultiWriter(chunkFile, chunkHasher, snapshotHasher), chunkBody); err != nil {
 		return errors.Wrapf(err, "failed to generate snapshot chunk %d", index)
+	}
+
+	if err := chunkFile.Close(); err != nil {
+		return errors.Wrapf(err, "failed to close snapshot chunk file %d", index)
+	}
+
+	if err := chunkBody.Close(); err != nil {
+		return errors.Wrapf(err, "failed to close snapshot chunk body %d", index)
 	}
 
 	snapshot.Metadata.ChunkHashes = append(snapshot.Metadata.ChunkHashes, chunkHasher.Sum(nil))

@@ -38,16 +38,3 @@ func (e *Exporter) Close() error {
 
 	return nil
 }
-
-// EmptyExporter is a Exporter for an empty tree.
-type EmptyExporter struct{}
-
-// Next returns ExportDone.
-func (e *EmptyExporter) Next() (*snapshotstypes.SnapshotIAVLItem, error) {
-	return nil, commitment.ErrorExportDone
-}
-
-// Close does nothing.
-func (e *EmptyExporter) Close() error {
-	return nil
-}

@@ -12,6 +12,7 @@ import (
 
 	coreserver "github.com/SaharaLabsAI/sahara-store/core/server"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+
 	storeerrors "cosmossdk.io/store/v2/errors"
 )
 
@@ -72,7 +73,7 @@ func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 		return nil, fmt.Errorf("failed to perform PebbleDB read: %w", err)
 	}
 
-	return slices.Clone(bz), closer.Close()
+	return bz, closer.Close()
 }
 
 func (db *PebbleDB) Has(key []byte) (bool, error) {
@@ -228,9 +229,6 @@ func (itr *pebbleDBIterator) Error() error {
 }
 
 func (itr *pebbleDBIterator) Close() error {
-	if itr.source == nil {
-		return nil
-	}
 	err := itr.source.Close()
 	itr.source = nil
 	itr.valid = false

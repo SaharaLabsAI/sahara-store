@@ -7,15 +7,18 @@ import (
 	"maps"
 	"math"
 	"slices"
+	"time"
 
 	protoio "github.com/cosmos/gogoproto/io"
 	"golang.org/x/sync/errgroup"
 
 	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+
 	"cosmossdk.io/store/v2"
 	"cosmossdk.io/store/v2/internal"
 	"cosmossdk.io/store/v2/internal/conv"
+	"cosmossdk.io/store/v2/metrics"
 	"cosmossdk.io/store/v2/proof"
 	"cosmossdk.io/store/v2/snapshots"
 	snapshotstypes "cosmossdk.io/store/v2/snapshots/types"
@@ -49,19 +52,33 @@ type CommitStore struct {
 	// oldTrees is a map of store keys to old trees that have been deleted or renamed.
 	// It is used to get the proof for the old store keys.
 	oldTrees map[string]Tree
+	metrics  metrics.StoreMetrics
 }
 
 // NewCommitStore creates a new CommitStore instance.
-func NewCommitStore(trees, oldTrees map[string]Tree, db corestore.KVStoreWithBatch, logger corelog.Logger) (*CommitStore, error) {
+func NewCommitStore(
+	trees, oldTrees map[string]Tree,
+	db corestore.KVStoreWithBatch,
+	logger corelog.Logger,
+	metrics metrics.StoreMetrics,
+) (*CommitStore, error) {
 	return &CommitStore{
 		logger:     logger,
 		multiTrees: trees,
 		oldTrees:   oldTrees,
 		metadata:   NewMetadataStore(db),
+		metrics:    metrics,
 	}, nil
 }
 
 func (c *CommitStore) WriteChangeset(cs *corestore.Changeset) error {
+	if c.metrics != nil {
+		start := time.Now()
+		defer func() {
+			c.metrics.MeasureSince(start, "store_write_changeset")
+			c.logger.Info("write changeset", "duration", time.Since(start))
+		}()
+	}
 	eg := new(errgroup.Group)
 	eg.SetLimit(store.MaxWriteParallelism)
 	for _, pairs := range cs.Changes {
@@ -221,6 +238,13 @@ func (c *CommitStore) loadVersion(targetVersion uint64, storeKeys []string, over
 }
 
 func (c *CommitStore) Commit(version uint64) (*proof.CommitInfo, error) {
+	if c.metrics != nil {
+		start := time.Now()
+		defer func() {
+			c.metrics.MeasureSince(start, "store_commit")
+			c.logger.Info("commit", "duration", time.Since(start))
+		}()
+	}
 	storeInfos := make([]*proof.StoreInfo, 0, len(c.multiTrees))
 	eg := new(errgroup.Group)
 	eg.SetLimit(store.MaxWriteParallelism)
@@ -229,7 +253,7 @@ func (c *CommitStore) Commit(version uint64) (*proof.CommitInfo, error) {
 		if internal.IsMemoryStoreKey(storeKey) {
 			continue
 		}
-		si := &proof.StoreInfo{Name: storeKey}
+		si := &proof.StoreInfo{Name: []byte(storeKey)}
 		storeInfos = append(storeInfos, si)
 
 		if tree.IsConcurrentSafe() {
@@ -248,13 +272,9 @@ func (c *CommitStore) Commit(version uint64) (*proof.CommitInfo, error) {
 		}
 	}
 
-	// convert storeInfos to []proof.StoreInfo
-	sideref := make([]*proof.StoreInfo, 0, len(c.multiTrees))
-	sideref = append(sideref, storeInfos...)
-
 	cInfo := &proof.CommitInfo{
-		Version:    int64(version),
-		StoreInfos: sideref,
+		Version:    version,
+		StoreInfos: storeInfos,
 	}
 
 	if err := eg.Wait(); err != nil {
@@ -276,8 +296,8 @@ func (c *CommitStore) commit(tree Tree, si *proof.StoreInfo, expected uint64) er
 	if v != expected {
 		return fmt.Errorf("commit version %d does not match the target version %d", v, expected)
 	}
-	si.CommitId = &proof.CommitID{
-		Version: int64(v),
+	si.CommitID = &proof.CommitID{
+		Version: v,
 		Hash:    h,
 	}
 	return nil
@@ -563,9 +583,6 @@ loop:
 					node.Value = []byte{}
 				}
 			}
-			if node.Version == 0 {
-				node.Version = int64(version)
-			}
 			err := importer.Add(node)
 			if err != nil {
 				return snapshotstypes.SnapshotItem{}, fmt.Errorf("failed to add node to importer: %w", err)
@@ -603,17 +620,18 @@ func (c *CommitStore) GetCommitInfo(version uint64) (*proof.CommitInfo, error) {
 		if v != version {
 			return nil, fmt.Errorf("tree version %d does not match the target version %d", v, version)
 		}
+		bz := []byte(storeKey)
 		storeInfos = append(storeInfos, &proof.StoreInfo{
-			Name: storeKey,
-			CommitId: &proof.CommitID{
-				Version: int64(v),
+			Name: bz,
+			CommitID: &proof.CommitID{
+				Version: v,
 				Hash:    tree.Hash(),
 			},
 		})
 	}
 
 	ci = &proof.CommitInfo{
-		Version:    int64(version),
+		Version:    version,
 		StoreInfos: storeInfos,
 	}
 	return ci, nil

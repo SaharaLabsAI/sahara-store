@@ -8,8 +8,10 @@ import (
 
 	"github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+
 	"cosmossdk.io/store/v2"
 	"cosmossdk.io/store/v2/commitment"
+	"cosmossdk.io/store/v2/metrics"
 )
 
 var (
@@ -25,16 +27,16 @@ type Tree struct {
 }
 
 func NewTree(
-	cfg Config,
+	treeOptions iavl.TreeOptions,
 	dbOptions iavl.SqliteDbOptions,
 	log log.Logger,
 ) (*Tree, error) {
-	pool := iavl.NewNodePool()
+	pool := iavl.NewSyncNodePool(&metrics.Metrics{})
 	sql, err := iavl.NewSqliteDb(pool, dbOptions)
 	if err != nil {
 		return nil, err
 	}
-	tree := iavl.NewTree(sql, pool, cfg.ToTreeOptions())
+	tree := iavl.NewTree(sql, pool, treeOptions)
 	return &Tree{tree: tree, log: log, path: dbOptions.Path}, nil
 }
 
@@ -196,6 +198,16 @@ func isHighBitSet(version uint64) error {
 		return fmt.Errorf("%d too large; uint64 with the highest bit set are not supported", version)
 	}
 	return nil
+}
+
+func DefaultOptions(keepVersions int64) iavl.TreeOptions {
+	opts := iavl.DefaultTreeOptions()
+	opts.MinimumKeepVersions = keepVersions
+	opts.CheckpointInterval = 100
+	opts.PruneRatio = 1
+	opts.HeightFilter = 1
+	opts.EvictionDepth = 22
+	return opts
 }
 
 func SetGlobalPruneLimit(limit int) {
