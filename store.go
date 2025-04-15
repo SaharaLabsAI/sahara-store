@@ -8,7 +8,7 @@ import (
 	"github.com/SaharaLabsAI/sahara-store/proof"
 )
 
-var MaxWriteParallelism = 8
+var MaxWriteParallelism = 16
 
 // RootStore defines an abstraction layer containing a State Storage (SS) engine
 // and one or more State Commitment (SC) engines.
