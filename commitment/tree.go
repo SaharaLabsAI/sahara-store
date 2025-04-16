@@ -40,8 +40,10 @@ type Tree interface {
 
 	// Added
 	GetDirty(key []byte) ([]byte, error)
+	HasDirty(key []byte) (bool, error)
 	WorkingHash() []byte
 	GetImmutable(version uint64) (Tree, error)
+	IteratorDirty(start, end []byte, ascending bool) (corestore.Iterator, error)
 }
 
 // Reader is the optional interface that is only used to read data from the tree
