@@ -22,9 +22,10 @@ import (
 	protoio "github.com/cosmos/gogoproto/io"
 
 	store "github.com/SaharaLabsAI/sahara-store"
-	commstore "github.com/SaharaLabsAI/sahara-store/commitment"
 	coretypes "github.com/SaharaLabsAI/sahara-store/core/store"
 	"github.com/SaharaLabsAI/sahara-store/root"
+
+	compatiavl "github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
 
 	"github.com/SaharaLabsAI/sahara-store/compatv1/kv"
 	storetypes "github.com/SaharaLabsAI/sahara-store/compatv1/types"
@@ -43,7 +44,7 @@ type Store struct {
 
 	keysByName map[string]types.StoreKey
 	storeTypes map[types.StoreKey]types.StoreType
-	stores     map[types.StoreKey]types.CommitStore
+	stores     map[types.StoreKey]types.CommitKVStore
 }
 
 func NewStore(logger log.Logger, root store.RootStore) *Store {
@@ -54,7 +55,7 @@ func NewStore(logger log.Logger, root store.RootStore) *Store {
 
 		keysByName: make(map[string]types.StoreKey),
 		storeTypes: make(map[types.StoreKey]types.StoreType),
-		stores:     make(map[types.StoreKey]types.CommitStore),
+		stores:     make(map[types.StoreKey]types.CommitKVStore),
 	}
 }
 
@@ -92,29 +93,25 @@ func (s *Store) CacheMultiStoreWithVersion(version int64) (types.CacheMultiStore
 		return s.CacheMultiStore(), nil
 	}
 
-	lastCommitID, err := s.root.LastCommitID()
-	if err != nil {
-		return nil, err
-	}
-	if uint64(version) == lastCommitID.Version {
-		return s.CacheMultiStore(), nil
-	}
-
-	if err := s.root.LoadVersion(uint64(version)); err != nil {
-		return nil, err
-	}
-
 	stores := make(map[types.StoreKey]types.CacheWrapper)
 	for k, v := range s.stores {
-		store := types.CacheWrapper(v)
-		if _, ok := store.(types.KVStore); !ok {
-			continue
+		var cacheStore types.KVStore
+		switch v.GetStoreType() {
+		case types.StoreTypeIAVL:
+			store, err := v.(*compatiavl.Store).GetImmutable(uint64(version))
+			if err != nil {
+				return nil, err
+			}
+
+			cacheStore = store
+			if s.ListeningEnabled(k) {
+				// FIXME
+				// store = listenkv.NewStore(kv, k, s.li)
+			}
+		default:
+			cacheStore = v
 		}
-		if s.ListeningEnabled(k) {
-			// FIXME
-			// store = listenkv.NewStore(kv, k, s.li)
-		}
-		stores[k] = store
+		stores[k] = cacheStore
 	}
 
 	return cachemulti.NewStore(nil, stores, nil, nil, nil), nil
@@ -130,52 +127,10 @@ func (s *Store) CacheWrapWithTrace(w io.Writer, tc types.TraceContext) types.Cac
 	return s.CacheWrap()
 }
 
-func (s *Store) writeChangeSet() error {
-	latestVersion, err := s.root.GetLatestVersion()
-	if err != nil {
-		return err
-	}
-
-	changeset := coretypes.Changeset{
-		Version: latestVersion + 1,
-		Changes: make([]coretypes.StateChanges, 0),
-	}
-
-	for key, store := range s.stores {
-		if _, ok := key.(*types.KVStoreKey); !ok {
-			continue
-		}
-
-		iavl2store, ok := store.(*iavl2.Store)
-		if !ok {
-			continue
-		}
-
-		cs := iavl2store.PopChangeSet()
-		if len(cs.Changes) > 0 {
-			changeset.Changes = append(changeset.Changes, cs.Changes...)
-		}
-	}
-
-	commitStore, ok := s.root.GetStateCommitment().(*commstore.CommitStore)
-	if !ok {
-		panic("unexpected iavl2 commit store")
-	}
-
-	return commitStore.WriteChangeset(&changeset)
-}
-
 // Commit implements types.CommitMultiStore.
 func (s *Store) Commit() types.CommitID {
 	hash := s.WorkingHash()
 	s.logger.Error("before write change set again", "hash", fmt.Sprintf("%X", hash))
-
-	if err := s.writeChangeSet(); err != nil {
-		panic(err)
-	}
-
-	hash = s.WorkingHash()
-	s.logger.Error("finish write change set, before commit", "hash", fmt.Sprintf("%X", hash))
 
 	latestVersion, err := s.root.GetLatestVersion()
 	if err != nil {
@@ -207,17 +162,12 @@ func (s *Store) Commit() types.CommitID {
 
 // GetCommitKVStore implements types.CommitMultiStore.
 func (s *Store) GetCommitKVStore(key types.StoreKey) types.CommitKVStore {
-	store, ok := s.GetCommitStore(key).(types.CommitKVStore)
-	if !ok {
-		panic(fmt.Sprintf("store %s is not CommitKVStore", key.Name()))
-	}
-
-	return store
+	return s.stores[key]
 }
 
 // GetCommitStore implements types.CommitMultiStore.
 func (s *Store) GetCommitStore(key types.StoreKey) types.CommitStore {
-	return s.stores[key]
+	return s.GetCommitKVStore(key)
 }
 
 // GetKVStore implements types.CommitMultiStore.
@@ -329,7 +279,7 @@ func (s *Store) LoadVersionAndUpgrade(ver int64, upgrades *types.StoreUpgrades) 
 		return err
 	}
 
-	newStores := make(map[types.StoreKey]types.CommitStore, len(s.storeTypes))
+	newStores := make(map[types.StoreKey]types.CommitKVStore, len(s.storeTypes))
 	for key, typ := range s.storeTypes {
 		store, err := s.loadCommitStoreFromParams(key, typ)
 		if err != nil {
@@ -445,10 +395,6 @@ func (s *Store) TracingEnabled() bool {
 
 // WorkingHash implements types.CommitMultiStore.
 func (s *Store) WorkingHash() []byte {
-	if err := s.writeChangeSet(); err != nil {
-		panic(err)
-	}
-
 	storeInfos := make([]types.StoreInfo, 0, len(s.stores))
 
 	for key, store := range s.stores {
@@ -564,12 +510,12 @@ func (s *Store) Query(req *types.RequestQuery) (*types.ResponseQuery, error) {
 	return res, nil
 }
 
-func (s *Store) loadCommitStoreFromParams(key types.StoreKey, typ types.StoreType) (types.CommitStore, error) {
+func (s *Store) loadCommitStoreFromParams(key types.StoreKey, typ types.StoreType) (types.CommitKVStore, error) {
 	switch typ {
 	case types.StoreTypeMulti:
 		panic("recursive MultiStores not yet supported")
 	case types.StoreTypeIAVL:
-		return iavl2.NewStore(key, s.root), nil
+		return compatiavl.LoadStore(s.root, key), nil
 	case types.StoreTypeDB:
 		panic("recursive MultiStores not yet supported")
 	case types.StoreTypeTransient:

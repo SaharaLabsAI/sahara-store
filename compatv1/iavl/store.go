@@ -133,3 +133,15 @@ func (s *Store) Set(key []byte, value []byte) {
 		panic(err)
 	}
 }
+
+func (s *Store) GetImmutable(version uint64) (*Store, error) {
+	imTree, err := s.tree.GetImmutable(version)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Store{
+		storeKey: s.storeKey,
+		tree:     imTree,
+	}, nil
+}

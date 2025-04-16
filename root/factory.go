@@ -9,7 +9,6 @@ import (
 	store "github.com/SaharaLabsAI/sahara-store"
 	"github.com/SaharaLabsAI/sahara-store/commitment"
 	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
-	"github.com/SaharaLabsAI/sahara-store/commitment/mem"
 	"github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	"github.com/SaharaLabsAI/sahara-store/internal"
@@ -93,7 +92,7 @@ func CreateRootStore(opts *FactoryOptions) (store.RootStore, error) {
 
 	newTreeFn := func(key string) (commitment.Tree, error) {
 		if internal.IsMemoryStoreKey(key) {
-			return mem.New(), nil
+			return nil, errors.New("mem tree is removed")
 		} else {
 			switch storeOpts.SCType {
 			case SCTypeIavl:
