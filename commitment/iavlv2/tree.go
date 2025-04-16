@@ -199,7 +199,7 @@ func isHighBitSet(version uint64) error {
 	return nil
 }
 
-func DefaultOptions(keepVersions int64) iavl.TreeOptions {
+func DefaultOptions() iavl.TreeOptions {
 	opts := iavl.DefaultTreeOptions()
 	opts.CheckpointInterval = 100
 	opts.HeightFilter = 1
