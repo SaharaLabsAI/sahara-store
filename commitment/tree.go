@@ -37,6 +37,11 @@ type Tree interface {
 	IsConcurrentSafe() bool
 
 	io.Closer
+
+	// Added
+	GetDirty(key []byte) ([]byte, error)
+	WorkingHash() []byte
+	GetImmutable(version uint64) (Tree, error)
 }
 
 // Reader is the optional interface that is only used to read data from the tree

@@ -105,14 +105,11 @@ func (t *Tree) Get(version uint64, key []byte) ([]byte, error) {
 	if versionFound {
 		return val, err
 	}
-	cloned, err := t.tree.ReadonlyClone()
+	imTree, err := t.tree.GetImmutable(int64(version))
 	if err != nil {
 		return nil, err
 	}
-	if err = cloned.LoadVersion(int64(version)); err != nil {
-		return nil, err
-	}
-	return cloned.Get(key)
+	return imTree.Get(key)
 }
 
 func (t *Tree) Has(version uint64, key []byte) (bool, error) {
@@ -133,19 +130,16 @@ func (t *Tree) Iterator(version uint64, start, end []byte, ascending bool) (core
 	if ok {
 		return itr, nil
 	}
-	cloned, err := t.tree.ReadonlyClone()
+	imTree, err := t.tree.GetImmutable(int64(version))
 	if err != nil {
-		return nil, err
-	}
-	if err = cloned.LoadVersion(int64(version)); err != nil {
 		return nil, err
 	}
 	if ascending {
 		// inclusive = false is IAVL v1's default behavior.
 		// the read expectations of certain modules (like x/staking) will cause a panic if this is changed.
-		return t.tree.Iterator(start, end, false)
+		return imTree.Iterator(start, end, false)
 	} else {
-		return t.tree.ReverseIterator(start, end)
+		return imTree.ReverseIterator(start, end)
 	}
 }
 
@@ -187,11 +181,6 @@ func (t *Tree) IsConcurrentSafe() bool {
 	return true
 }
 
-func (t *Tree) WorkingHash() []byte {
-	// return t.tree.Hash()
-	return t.tree.WorkingHash()
-}
-
 func isHighBitSet(version uint64) error {
 	if version&(1<<63) != 0 {
 		return fmt.Errorf("%d too large; uint64 with the highest bit set are not supported", version)
@@ -205,4 +194,26 @@ func DefaultOptions() iavl.TreeOptions {
 	opts.HeightFilter = 1
 	opts.EvictionDepth = 22
 	return opts
+}
+
+func (t *Tree) GetDirty(key []byte) ([]byte, error) {
+	return t.tree.Get(key)
+}
+
+func (t *Tree) WorkingHash() []byte {
+	// return t.tree.Hash()
+	return t.tree.WorkingHash()
+}
+
+func (t *Tree) GetImmutable(version uint64) (commitment.Tree, error) {
+	imTree, err := t.tree.GetImmutable(int64(version))
+	if err != nil {
+		return nil, err
+	}
+
+	return &Tree{
+		tree: imTree,
+		log:  t.log,
+		path: t.path,
+	}, nil
 }
