@@ -23,8 +23,8 @@ func TestCommitterSuite(t *testing.T) {
 			storeKeys, oldStoreKeys []string,
 			logger corelog.Logger,
 		) (*commitment.CommitStore, error) {
-			multiTrees := make(map[string]commitment.Tree)
-			mountTreeFn := func(storeKey string) (commitment.Tree, error) {
+			multiTrees := make(map[string]commitment.CompatV1Tree)
+			mountTreeFn := func(storeKey string) (commitment.CompatV1Tree, error) {
 				path := fmt.Sprintf("%s/%s", dbDir, storeKey)
 				tree, err := NewTree(iavl.DefaultTreeOptions(), iavl.SqliteDbOptions{Path: path}, logger)
 				require.NoError(t, err)
@@ -33,7 +33,7 @@ func TestCommitterSuite(t *testing.T) {
 			for _, storeKey := range storeKeys {
 				multiTrees[storeKey], _ = mountTreeFn(storeKey)
 			}
-			oldTrees := make(map[string]commitment.Tree)
+			oldTrees := make(map[string]commitment.CompatV1Tree)
 			for _, storeKey := range oldStoreKeys {
 				oldTrees[storeKey], _ = mountTreeFn(storeKey)
 			}

@@ -37,8 +37,8 @@ func (s *PruningManagerTestSuite) SetupTest() {
 	var err error
 
 	mdb := dbm.NewMemDB()
-	multiTrees := make(map[string]commitment.Tree)
-	mountTreeFn := func(storeKey string) (commitment.Tree, error) {
+	multiTrees := make(map[string]commitment.CompatV1Tree)
+	mountTreeFn := func(storeKey string) (commitment.CompatV1Tree, error) {
 		path := fmt.Sprintf("%s/%s", s.T().TempDir(), storeKey)
 		tree, err := iavlv2.NewTree(iavl.DefaultTreeOptions(), iavl.SqliteDbOptions{Path: path}, coretesting.NewNopLogger())
 		require.NoError(s.T(), err)

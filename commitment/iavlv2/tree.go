@@ -195,37 +195,3 @@ func DefaultOptions() iavl.TreeOptions {
 	opts.EvictionDepth = 22
 	return opts
 }
-
-func (t *Tree) GetDirty(key []byte) ([]byte, error) {
-	return t.tree.Get(key)
-}
-
-func (t *Tree) HasDirty(key []byte) (bool, error) {
-	return t.tree.Has(key)
-}
-
-func (t *Tree) WorkingHash() []byte {
-	// return t.tree.Hash()
-	return t.tree.WorkingHash()
-}
-
-func (t *Tree) GetImmutable(version uint64) (commitment.Tree, error) {
-	imTree, err := t.tree.GetImmutable(int64(version))
-	if err != nil {
-		return nil, err
-	}
-
-	return &Tree{
-		tree: imTree,
-		log:  t.log,
-		path: t.path,
-	}, nil
-}
-
-func (t *Tree) IteratorDirty(start, end []byte, ascending bool) (corestore.Iterator, error) {
-	if ascending {
-		return t.tree.Iterator(start, end, false)
-	}
-
-	return t.tree.ReverseIterator(start, end)
-}

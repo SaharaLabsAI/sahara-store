@@ -90,7 +90,7 @@ func CreateRootStore(opts *FactoryOptions) (store.RootStore, error) {
 		return nil, err
 	}
 
-	newTreeFn := func(key string) (commitment.Tree, error) {
+	newTreeFn := func(key string) (commitment.CompatV1Tree, error) {
 		if internal.IsMemoryStoreKey(key) {
 			return nil, errors.New("mem tree is removed")
 		} else {
@@ -109,7 +109,7 @@ func CreateRootStore(opts *FactoryOptions) (store.RootStore, error) {
 		}
 	}
 
-	trees := make(map[string]commitment.Tree, len(opts.StoreKeys))
+	trees := make(map[string]commitment.CompatV1Tree, len(opts.StoreKeys))
 	for _, key := range opts.StoreKeys {
 		tree, err := newTreeFn(key)
 		if err != nil {
@@ -117,7 +117,7 @@ func CreateRootStore(opts *FactoryOptions) (store.RootStore, error) {
 		}
 		trees[key] = tree
 	}
-	oldTrees := make(map[string]commitment.Tree, len(opts.StoreKeys))
+	oldTrees := make(map[string]commitment.CompatV1Tree, len(opts.StoreKeys))
 	for _, key := range removedStoreKeys {
 		tree, err := newTreeFn(string(key))
 		if err != nil {

@@ -36,8 +36,8 @@ func (s *MigrateStoreTestSuite) SetupTest() {
 	testLog := log.NewTestLogger(s.T())
 
 	mdb := dbm.NewMemDB()
-	multiTrees := make(map[string]commitment.Tree)
-	mountTreeFn := func(storeKey string) (commitment.Tree, error) {
+	multiTrees := make(map[string]commitment.CompatV1Tree)
+	mountTreeFn := func(storeKey string) (commitment.CompatV1Tree, error) {
 		path := fmt.Sprintf("%s/%s", s.T().TempDir(), storeKey)
 		tree, err := iavlv2.NewTree(iavl.DefaultTreeOptions(), iavl.SqliteDbOptions{Path: path}, coretesting.NewNopLogger())
 		require.NoError(s.T(), err)
@@ -64,7 +64,7 @@ func (s *MigrateStoreTestSuite) SetupTest() {
 		s.Require().NoError(err)
 	}
 
-	multiTrees1 := make(map[string]commitment.Tree)
+	multiTrees1 := make(map[string]commitment.CompatV1Tree)
 	for _, storeKey := range storeKeys {
 		multiTrees1[storeKey], _ = mountTreeFn(storeKey)
 	}

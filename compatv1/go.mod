@@ -15,6 +15,7 @@ require (
 	cosmossdk.io/store v1.1.1
 	github.com/SaharaLabsAI/sahara-store v0.0.0-20250407062823-6f10045d97e5
 	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250407062823-6f10045d97e5
+	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250407062823-6f10045d97e5
 	github.com/cometbft/cometbft v0.38.17
 	github.com/cosmos/cosmos-db v1.1.1
 	github.com/cosmos/cosmos-sdk v0.50.13
@@ -38,7 +39,6 @@ require (
 	github.com/99designs/keyring v1.2.1 // indirect
 	github.com/DataDog/datadog-go v3.2.0+incompatible // indirect
 	github.com/DataDog/zstd v1.5.5 // indirect
-	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250407062823-6f10045d97e5 // indirect
 	github.com/aybabtme/uniplot v0.0.0-20151203143629-039c559e5e7e // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.1-0.20220910012023-760eaf8b6816 // indirect

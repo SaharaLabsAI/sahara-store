@@ -47,16 +47,16 @@ type MountTreeFn func(storeKey string) (Tree, error)
 type CommitStore struct {
 	logger     corelog.Logger
 	metadata   *MetadataStore
-	multiTrees map[string]Tree
+	multiTrees map[string]CompatV1Tree
 	// oldTrees is a map of store keys to old trees that have been deleted or renamed.
 	// It is used to get the proof for the old store keys.
-	oldTrees map[string]Tree
+	oldTrees map[string]CompatV1Tree
 	metrics  metrics.StoreMetrics
 }
 
 // NewCommitStore creates a new CommitStore instance.
 func NewCommitStore(
-	trees, oldTrees map[string]Tree,
+	trees, oldTrees map[string]CompatV1Tree,
 	db corestore.KVStoreWithBatch,
 	logger corelog.Logger,
 	metrics metrics.StoreMetrics,
@@ -650,8 +650,8 @@ func (c *CommitStore) Close() error {
 	return nil
 }
 
-func (c *CommitStore) GetTree(storeKey string) (Tree, error) {
-	var tree Tree
+func (c *CommitStore) GetTree(storeKey string) (CompatV1Tree, error) {
+	var tree CompatV1Tree
 
 	if storeTree, ok := c.oldTrees[storeKey]; ok {
 		tree = storeTree

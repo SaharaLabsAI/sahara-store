@@ -98,7 +98,7 @@ func (s *Store) CacheMultiStoreWithVersion(version int64) (types.CacheMultiStore
 		var cacheStore types.KVStore
 		switch v.GetStoreType() {
 		case types.StoreTypeIAVL:
-			store, err := v.(*compatiavl.Store).GetImmutable(uint64(version))
+			store, err := v.(*compatiavl.Store).GetImmutable(version)
 			if err != nil {
 				return nil, err
 			}

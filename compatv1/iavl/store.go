@@ -1,27 +1,36 @@
 package iavl
 
 import (
+	"fmt"
 	"io"
+
+	"github.com/cometbft/cometbft/proto/tendermint/crypto"
 
 	"cosmossdk.io/store/cachekv"
 	pruningtypes "cosmossdk.io/store/pruning/types"
 	"cosmossdk.io/store/tracekv"
-
 	"cosmossdk.io/store/types"
+
+	iavl_v2 "github.com/cosmos/iavl/v2"
 
 	store "github.com/SaharaLabsAI/sahara-store"
 	commstore "github.com/SaharaLabsAI/sahara-store/commitment"
+	commiavl "github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
+	"github.com/SaharaLabsAI/sahara-store/core/log"
+	"github.com/SaharaLabsAI/sahara-store/proof"
+
+	"github.com/SaharaLabsAI/sahara-store/compatv1/kv"
 )
 
 var (
 	_ types.KVStore       = (*Store)(nil)
 	_ types.CommitStore   = (*Store)(nil)
 	_ types.CommitKVStore = (*Store)(nil)
+	_ types.Queryable     = (*Store)(nil)
 )
 
 type Store struct {
-	storeKey types.StoreKey
-	tree     commstore.Tree
+	tree commstore.CompatV1Tree
 }
 
 // LoadStore from given root store, the tree version is
@@ -32,14 +41,42 @@ func LoadStore(root store.RootStore, storeKey types.StoreKey) *Store {
 	}
 
 	return &Store{
-		storeKey: storeKey,
-		tree:     tree,
+		tree: tree,
+	}
+}
+
+func LoadStoreWithOpts(treeOpts iavl_v2.TreeOptions, dbOpts iavl_v2.SqliteDbOptions, log log.Logger, version int64) (*Store, error) {
+	tree, err := commiavl.NewTree(treeOpts, dbOpts, log)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tree.LoadVersion(uint64(version)); err != nil {
+		return nil, err
+	}
+
+	return &Store{
+		tree: tree,
+	}, nil
+}
+
+func UnsafeNewStore(tree commstore.CompatV1Tree) *Store {
+	return &Store{
+		tree: tree,
 	}
 }
 
 // Commit implements types.CommitStore.
 func (s *Store) Commit() types.CommitID {
-	panic("iavl2 store is not supposed to be commited alone")
+	hash, v, err := s.tree.Commit()
+	if err != nil {
+		panic(err)
+	}
+
+	return types.CommitID{
+		Version: int64(v),
+		Hash:    hash,
+	}
 }
 
 // GetPruning implements types.CommitStore.
@@ -129,19 +166,168 @@ func (s *Store) ReverseIterator(start []byte, end []byte) types.Iterator {
 
 // Set implements types.KVStore.
 func (s *Store) Set(key []byte, value []byte) {
+	if key == nil || len(key) == 0 {
+		panic("set nil value")
+	}
+
 	if err := s.tree.Set(key, value); err != nil {
 		panic(err)
 	}
 }
 
-func (s *Store) GetImmutable(version uint64) (*Store, error) {
-	imTree, err := s.tree.GetImmutable(version)
+func (s *Store) GetImmutable(version int64) (*Store, error) {
+	imTree, err := s.tree.GetImmutable(uint64(version))
 	if err != nil {
 		return nil, err
 	}
 
 	return &Store{
-		storeKey: s.storeKey,
-		tree:     imTree,
+		tree: imTree,
 	}, nil
+}
+
+func getHeight(tree commstore.CompatV1Tree, req *types.RequestQuery) int64 {
+	height := uint64(req.Height)
+	if height == 0 {
+		latest := tree.Version()
+		if tree.VersionExists(latest - 1) {
+			height = latest - 1
+		} else {
+			height = latest
+		}
+	}
+	return int64(height)
+}
+
+func getProofFromTree(tree commstore.CompatV1Tree, key []byte) *crypto.ProofOps {
+	iProof, err := tree.GetProof(tree.Version(), key)
+	if err != nil {
+		panic(fmt.Sprintf("unexpected error for proof: %s", err.Error()))
+	}
+
+	commitOp := proof.NewIAVLCommitmentOp(key, iProof)
+
+	proofOps := &crypto.ProofOps{
+		Ops: make([]crypto.ProofOp, 0),
+	}
+	for _, op := range []proof.CommitmentOp{commitOp} {
+		bz, err := op.Proof.Marshal()
+		if err != nil {
+			panic(err.Error())
+		}
+
+		proofOps.Ops = append(proofOps.Ops, crypto.ProofOp{
+			Type: op.Type,
+			Key:  op.Key,
+			Data: bz,
+		})
+	}
+
+	return proofOps
+}
+
+func prefixEndBytes(prefix []byte) []byte {
+	if len(prefix) == 0 {
+		return nil
+	}
+
+	end := make([]byte, len(prefix))
+	copy(end, prefix)
+
+	for {
+		if end[len(end)-1] != byte(255) {
+			end[len(end)-1]++
+			break
+		}
+
+		end = end[:len(end)-1]
+
+		if len(end) == 0 {
+			end = nil
+			break
+		}
+	}
+
+	return end
+}
+
+func (s *Store) Query(req *types.RequestQuery) (res *types.ResponseQuery, err error) {
+	if len(req.Data) == 0 {
+		return &types.ResponseQuery{}, types.ErrTxDecode.Wrap("query cannot be zero length")
+	}
+
+	res = &types.ResponseQuery{
+		Height: getHeight(s.tree, req),
+	}
+
+	switch req.Path {
+	case "/key": // get by key
+		key := req.Data
+
+		res.Key = key
+		if !s.tree.VersionExists(uint64(res.Height)) {
+			res.Log = "version does not exist"
+			break
+		}
+
+		imTree, err := s.tree.GetImmutable(uint64(res.Height))
+		if err != nil {
+			panic(fmt.Sprintf("version exists in store but could not retrieve corresponding versioned tree in store, %s", err.Error()))
+		}
+
+		value, err := imTree.GetDirty(key)
+		if err != nil {
+			panic(err)
+		}
+		res.Value = value
+
+		if !req.Prove {
+			break
+		}
+
+		res.ProofOps = getProofFromTree(imTree, key)
+	case "/subspace":
+		pairs := kv.Pairs{ //nolint:staticcheck // We are in store v1.
+			Pairs: make([]kv.Pair, 0), //nolint:staticcheck // We are in store v1.
+		}
+
+		subspace := req.Data
+		res.Key = subspace
+
+		imTree, err := s.tree.GetImmutable(uint64(res.Height))
+		if err != nil {
+			panic(fmt.Sprintf("version exists in store but could not retrieve corresponding versioned tree in store, %s", err.Error()))
+		}
+
+		iter, err := imTree.IteratorDirty(subspace, prefixEndBytes(subspace), true)
+		if err != nil {
+			panic(err)
+		}
+
+		for ; iter.Valid(); iter.Next() {
+			pairs.Pairs = append(pairs.Pairs, kv.Pair{Key: iter.Key(), Value: iter.Value()}) //nolint:staticcheck // We are in store v1.
+		}
+		if err := iter.Close(); err != nil {
+			panic(fmt.Errorf("failed to close iter: %w", err))
+		}
+
+		bz, err := pairs.Marshal()
+		if err != nil {
+			panic(fmt.Errorf("failed to marshal KV pairs: %w", err))
+		}
+
+		res.Value = bz
+	default:
+		return nil, types.ErrUnknownRequest.Wrapf("unexpected query path: %v", req.Path)
+	}
+
+	return res, nil
+}
+
+func (s *Store) VersionExists(version int64) bool {
+	return s.tree.VersionExists(uint64(version))
+}
+
+func (s *Store) SetInitialVersion(version int64) error {
+	return s.tree.SetInitialVersion(uint64(version))
 }
