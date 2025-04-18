@@ -101,16 +101,22 @@ func TestLoadStore(t *testing.T) {
 	hStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(verH))
 	require.NoError(t, err)
 	require.Equal(t, string(hStore.Get([]byte("hello"))), "hallo")
+	require.Equal(t, hStore.WorkingHash(), cIDH.Hash)
+	require.Equal(t, hStore.LastCommitID().Hash, cIDH.Hash)
 
 	// Querying an existing store at some previous pruned height Hp
 	hpStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(verHp))
 	require.NoError(t, err)
 	require.Equal(t, string(hpStore.Get([]byte("hello"))), "hola")
+	require.Equal(t, hpStore.WorkingHash(), cIDHp.Hash)
+	require.Equal(t, hpStore.LastCommitID().Hash, cIDHp.Hash)
 
 	// Querying an existing store at current height Hc
 	hcStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(verHc))
 	require.NoError(t, err)
 	require.Equal(t, string(hcStore.Get([]byte("hello"))), "ciao")
+	require.Equal(t, hcStore.WorkingHash(), cIDHc.Hash)
+	require.Equal(t, hcStore.LastCommitID().Hash, cIDHc.Hash)
 
 	// // Querying a new store at some previous non-pruned height H
 	newHStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(cIDH.Version))

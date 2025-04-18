@@ -6,8 +6,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/cometbft/cometbft/proto/tendermint/crypto"
-
 	"cosmossdk.io/log"
 	"cosmossdk.io/store/cachemulti"
 	"cosmossdk.io/store/mem"
@@ -26,9 +24,6 @@ import (
 	"github.com/SaharaLabsAI/sahara-store/root"
 
 	compatiavl "github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
-
-	"github.com/SaharaLabsAI/sahara-store/compatv1/kv"
-	storetypes "github.com/SaharaLabsAI/sahara-store/compatv1/types"
 )
 
 var (
@@ -129,9 +124,6 @@ func (s *Store) CacheWrapWithTrace(w io.Writer, tc types.TraceContext) types.Cac
 
 // Commit implements types.CommitMultiStore.
 func (s *Store) Commit() types.CommitID {
-	hash := s.WorkingHash()
-	s.logger.Error("before write change set again", "hash", fmt.Sprintf("%X", hash))
-
 	latestVersion, err := s.root.GetLatestVersion()
 	if err != nil {
 		panic(err)
@@ -151,18 +143,12 @@ func (s *Store) Commit() types.CommitID {
 		}
 	}
 
-	hash = s.WorkingHash()
-	s.logger.Error("after commit", "hash", fmt.Sprintf("%X", hash))
-
-	hash = s.LastCommitID().Hash
-	s.logger.Error("last commit id", "hash", fmt.Sprintf("%X", hash))
-
 	return s.LastCommitID()
 }
 
 // GetCommitKVStore implements types.CommitMultiStore.
 func (s *Store) GetCommitKVStore(key types.StoreKey) types.CommitKVStore {
-	return s.stores[key]
+	return compatiavl.LoadStore(s.root, key)
 }
 
 // GetCommitStore implements types.CommitMultiStore.
@@ -172,12 +158,7 @@ func (s *Store) GetCommitStore(key types.StoreKey) types.CommitStore {
 
 // GetKVStore implements types.CommitMultiStore.
 func (s *Store) GetKVStore(key types.StoreKey) types.KVStore {
-	store, ok := s.GetStore(key).(types.KVStore)
-	if !ok {
-		panic(fmt.Sprintf("store %s is not KVStore", key.Name()))
-	}
-
-	return store
+	return s.GetCommitKVStore(key)
 }
 
 // TODO: impl pruning
@@ -188,12 +169,7 @@ func (s *Store) GetPruning() pruningtypes.PruningOptions {
 
 // GetStore implements types.CommitMultiStore.
 func (s *Store) GetStore(key types.StoreKey) types.Store {
-	store, ok := s.stores[key]
-	if !ok {
-		panic(fmt.Sprintf("store does not exist for key: %s", key.Name()))
-	}
-
-	return store
+	return s.GetCommitKVStore(key)
 }
 
 // GetStoreType implements types.CommitMultiStore.
@@ -408,7 +384,6 @@ func (s *Store) WorkingHash() []byte {
 				Hash: store.WorkingHash(),
 			},
 		}
-		// s.logger.Error("store working hash", "store", key.Name(), "working hash", fmt.Sprintf("%X", si.CommitId.Hash))
 		storeInfos = append(storeInfos, si)
 	}
 
@@ -418,96 +393,20 @@ func (s *Store) WorkingHash() []byte {
 
 	workingHash := types.CommitInfo{StoreInfos: storeInfos}.Hash()
 
-	s.logger.Error("workingHash, after write change set", "hash", fmt.Sprintf("%X", workingHash))
-
 	return workingHash
 }
 
 func (s *Store) Query(req *types.RequestQuery) (*types.ResponseQuery, error) {
-	version := req.Height
 	storeName, subpath, err := parsePath(req.Path)
 	if err != nil {
 		return nil, err
 	}
 
-	res := &types.ResponseQuery{
-		Height: version,
-	}
-
 	storeKey := s.keysByName[storeName]
-	actor := storetypes.StoreKeyToActor(storeKey)
+	store := s.stores[storeKey]
 
-	switch subpath {
-	case "/key": // get by key
-		r, err := s.root.Query(actor, uint64(version), req.Data, req.Prove)
-		if err != nil {
-			return nil, err
-		}
-
-		res.Key = r.Key
-		res.Value = r.Value
-
-		if !req.Prove {
-			break
-		}
-
-		proofOps := &crypto.ProofOps{
-			Ops: make([]crypto.ProofOp, 0),
-		}
-
-		for _, op := range r.ProofOps {
-			bz, err := op.Proof.Marshal()
-			if err != nil {
-				panic(err.Error())
-			}
-
-			proofOps.Ops = append(proofOps.Ops, crypto.ProofOp{
-				Type: op.Type,
-				Key:  op.Key,
-				Data: bz,
-			})
-		}
-	case "/subspace":
-		pairs := kv.Pairs{ //nolint:staticcheck // We are in store v1.
-			Pairs: make([]kv.Pair, 0), //nolint:staticcheck // We are in store v1.
-		}
-
-		readerMap, err := s.root.StateAt(uint64(version))
-		if err != nil {
-			return nil, err
-		}
-
-		reader, err := readerMap.GetReader(actor)
-		if err != nil {
-			return nil, err
-		}
-
-		subspace := req.Data
-		res.Key = subspace
-
-		iter, err := reader.Iterator(subspace, prefixEndBytes(subspace))
-		if err != nil {
-			return nil, err
-		}
-
-		for ; iter.Valid(); iter.Next() {
-			pairs.Pairs = append(pairs.Pairs, kv.Pair{Key: iter.Key(), Value: iter.Value()}) //nolint:staticcheck // We are in store v1.
-		}
-		if err := iter.Close(); err != nil {
-			panic(fmt.Errorf("failed to close iter: %w", err))
-		}
-
-		bz, err := pairs.Marshal()
-		if err != nil {
-			panic(fmt.Errorf("failed to marshal KV pairs: %w", err))
-		}
-
-		res.Value = bz
-	default:
-		return nil, sdkerrors.ErrUnknownRequest.Wrapf("unexpected query path: %v", req.Path)
-	}
-
-	return res, nil
+	req.Path = subpath
+	return store.(*compatiavl.Store).Query(req)
 }
 
 func (s *Store) loadCommitStoreFromParams(key types.StoreKey, typ types.StoreType) (types.CommitKVStore, error) {
