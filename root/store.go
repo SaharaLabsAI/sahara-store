@@ -136,6 +136,11 @@ func (s *Store) GetStateCommitment() store.Committer {
 // latest version set, which is based off of the SC view.
 func (s *Store) LastCommitID() (proof.CommitID, error) {
 	if s.lastCommitInfo != nil {
+		// TODO: this is a temporary work around
+		if s.lastCommitInfo.Version == 0 {
+			hash := sha256.Sum256([]byte{})
+			s.lastCommitInfo.CommitHash = hash[:]
+		}
 		return *s.lastCommitInfo.CommitID(), nil
 	}
 
@@ -143,6 +148,7 @@ func (s *Store) LastCommitID() (proof.CommitID, error) {
 	if err != nil {
 		return proof.CommitID{}, err
 	}
+
 	// if the latest version is 0, we return a CommitID with version 0 and a hash of an empty byte slice
 	bz := sha256.Sum256([]byte{})
 
