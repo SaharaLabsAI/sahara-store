@@ -3,15 +3,17 @@ package rootmulti
 import (
 	"fmt"
 	"io"
+	"math"
 	"sort"
 	"strings"
 
+	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/log"
 	"cosmossdk.io/store/cachemulti"
 	"cosmossdk.io/store/mem"
 	"cosmossdk.io/store/metrics"
 	pruningtypes "cosmossdk.io/store/pruning/types"
-	snapshotstypes "cosmossdk.io/store/snapshots/types"
+	snapshottypes "cosmossdk.io/store/snapshots/types"
 	"cosmossdk.io/store/transient"
 	"cosmossdk.io/store/types"
 
@@ -23,7 +25,10 @@ import (
 	coretypes "github.com/SaharaLabsAI/sahara-store/core/store"
 	"github.com/SaharaLabsAI/sahara-store/root"
 
+	commstore "github.com/SaharaLabsAI/sahara-store/commitment"
+	"github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
 	compatiavl "github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
+	commsnapshottypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
 )
 
 var (
@@ -78,7 +83,6 @@ func (s *Store) CacheMultiStore() types.CacheMultiStore {
 		stores[k] = store
 	}
 
-	// TODO: need confirmation
 	return cachemulti.NewStore(nil, stores, nil, nil, nil)
 }
 
@@ -297,10 +301,102 @@ func (s *Store) PopStateCache() []*types.StoreKVPair {
 func (s *Store) PruneSnapshotHeight(height int64) {
 }
 
-// TODO: impl snapshot
+func (s *Store) GetStoreByName(name string) types.Store {
+	key := s.keysByName[name]
+	if key == nil {
+		return nil
+	}
+
+	return s.GetCommitKVStore(key)
+}
+
 // Restore implements types.CommitMultiStore.
-func (s *Store) Restore(height uint64, format uint32, protoReader protoio.Reader) (snapshotstypes.SnapshotItem, error) {
-	return snapshotstypes.SnapshotItem{}, nil
+func (s *Store) Restore(height uint64, format uint32, protoReader protoio.Reader) (snapshottypes.SnapshotItem, error) {
+	var (
+		importer     commstore.Importer
+		snapshotItem snapshottypes.SnapshotItem
+	)
+loop:
+	for {
+		snapshotItem = snapshottypes.SnapshotItem{}
+		err := protoReader.ReadMsg(&snapshotItem)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return snapshottypes.SnapshotItem{}, errorsmod.Wrap(err, "invalid protobuf message")
+		}
+
+		switch item := snapshotItem.Item.(type) {
+		case *snapshottypes.SnapshotItem_Store:
+			if importer != nil {
+				err = importer.Commit()
+				if err != nil {
+					return snapshottypes.SnapshotItem{}, errorsmod.Wrap(err, "IAVL commit failed")
+				}
+				importer.Close()
+			}
+			store, ok := s.GetStoreByName(item.Store.Name).(*iavl.Store)
+			if !ok || store == nil {
+				return snapshottypes.SnapshotItem{}, errorsmod.Wrapf(types.ErrLogic, "cannot import into non-IAVL store %q", item.Store.Name)
+			}
+			importer, err = store.Import(int64(height))
+			if err != nil {
+				return snapshottypes.SnapshotItem{}, errorsmod.Wrap(err, "import failed")
+			}
+			defer importer.Close()
+			// Importer height must reflect the node height (which usually matches the block height, but not always)
+			s.logger.Debug("restoring snapshot", "store", item.Store.Name)
+
+		case *snapshottypes.SnapshotItem_IAVL:
+			if importer == nil {
+				s.logger.Error("failed to restore; received IAVL node item before store item")
+				return snapshottypes.SnapshotItem{}, errorsmod.Wrap(types.ErrLogic, "received IAVL node item before store item")
+			}
+			if item.IAVL.Height > math.MaxInt8 {
+				return snapshottypes.SnapshotItem{}, errorsmod.Wrapf(types.ErrLogic, "node height %v cannot exceed %v",
+					item.IAVL.Height, math.MaxInt8)
+			}
+			node := &commsnapshottypes.SnapshotIAVLItem{
+				Key:     item.IAVL.Key,
+				Value:   item.IAVL.Value,
+				Height:  item.IAVL.Height,
+				Version: item.IAVL.Version,
+			}
+			// Protobuf does not differentiate between []byte{} as nil, but fortunately IAVL does
+			// not allow nil keys nor nil values for leaf nodes, so we can always set them to empty.
+			if node.Key == nil {
+				node.Key = []byte{}
+			}
+			if node.Height == 0 && node.Value == nil {
+				node.Value = []byte{}
+			}
+			err := importer.Add(node)
+			if err != nil {
+				return snapshottypes.SnapshotItem{}, errorsmod.Wrap(err, "IAVL node import failed")
+			}
+
+		default:
+			break loop
+		}
+	}
+
+	if importer != nil {
+		err := importer.Commit()
+		if err != nil {
+			return snapshottypes.SnapshotItem{}, errorsmod.Wrap(err, "IAVL commit failed")
+		}
+		importer.Close()
+	}
+
+	_, err := s.root.Commit(&coretypes.Changeset{
+		Version: height,
+		Changes: make([]coretypes.StateChanges, 0),
+	})
+	if err != nil {
+		return snapshottypes.SnapshotItem{}, err
+	}
+
+	return snapshotItem, s.LoadLatestVersion()
 }
 
 // TODO: impl rollback, it's used when abci listenner throw an error
