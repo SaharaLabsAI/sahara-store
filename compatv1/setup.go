@@ -33,12 +33,9 @@ func setup(logger log.Logger, db dbm.DB, homePath string, storeKeyNames []string
 			Home:         homePath,
 			AppDBBackend: "pebbledb",
 			Options: root.Options{
-				SCType: root.SCTypeIavlV2,
-				SCPruningOption: &store.PruningOption{
-					KeepRecent: 2,
-					Interval:   5000,
-				},
-				IavlV2Config: iavlv2.DefaultOptions(),
+				SCType:          root.SCTypeIavlV2,
+				SCPruningOption: store.NewPruningOption(store.PruningNothing),
+				IavlV2Config:    iavlv2.DefaultOptions(),
 			},
 		}
 
