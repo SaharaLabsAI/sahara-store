@@ -6,6 +6,7 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"sync"
 
 	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/log"
@@ -15,6 +16,7 @@ import (
 	"cosmossdk.io/store/metrics"
 	pruningtypes "cosmossdk.io/store/pruning/types"
 	snapshottypes "cosmossdk.io/store/snapshots/types"
+	"cosmossdk.io/store/tracekv"
 	"cosmossdk.io/store/transient"
 	"cosmossdk.io/store/types"
 
@@ -46,6 +48,10 @@ type Store struct {
 	keysByName map[string]types.StoreKey
 	storeTypes map[types.StoreKey]types.StoreType
 	stores     map[types.StoreKey]types.CommitKVStore
+
+	traceWriter       io.Writer
+	traceContext      types.TraceContext
+	traceContextMutex sync.Mutex
 
 	listeners map[types.StoreKey]*types.MemoryListener
 }
@@ -89,8 +95,7 @@ func (s *Store) CacheMultiStore() types.CacheMultiStore {
 		stores[k] = store
 	}
 
-	// FIXME: tracer
-	return cachemulti.NewStore(nil, stores, s.keysByName, nil, nil)
+	return cachemulti.NewStore(nil, stores, s.keysByName, s.traceWriter, s.getTracingContext())
 }
 
 // CacheMultiStoreWithVersion implements types.CommitMultiStore.
@@ -121,8 +126,7 @@ func (s *Store) CacheMultiStoreWithVersion(version int64) (types.CacheMultiStore
 		stores[k] = cacheStore
 	}
 
-	// FIXME: tracer
-	return cachemulti.NewStore(nil, stores, s.keysByName, nil, nil), nil
+	return cachemulti.NewStore(nil, stores, s.keysByName, s.traceWriter, s.getTracingContext()), nil
 }
 
 // CacheWrap implements types.CommitMultiStore.
@@ -179,8 +183,7 @@ func (s *Store) GetKVStore(key types.StoreKey) types.KVStore {
 	store := types.KVStore(kvs)
 
 	if s.TracingEnabled() {
-		// FIXME: tracer
-		// store = tracekv.NewStore(store, )
+		store = tracekv.NewStore(store, s.traceWriter, s.getTracingContext())
 	}
 	if s.ListeningEnabled(key) {
 		store = listenkv.NewStore(store, key, s.listeners[key])
@@ -496,16 +499,35 @@ func (s *Store) SetPruning(pruningtypes.PruningOptions) {
 func (s *Store) SetSnapshotInterval(snapshotInterval uint64) {
 }
 
-// TODO: impl tracer
 // SetTracer implements types.CommitMultiStore.
 func (s *Store) SetTracer(w io.Writer) types.MultiStore {
-	return nil
+	s.traceWriter = w
+	return s
 }
 
-// TODO: impl tracer
 // SetTracingContext implements types.CommitMultiStore.
-func (s *Store) SetTracingContext(types.TraceContext) types.MultiStore {
-	return nil
+func (s *Store) SetTracingContext(tc types.TraceContext) types.MultiStore {
+	s.traceContextMutex.Lock()
+	defer s.traceContextMutex.Unlock()
+	s.traceContext = s.traceContext.Merge(tc)
+
+	return s
+}
+
+func (s *Store) getTracingContext() types.TraceContext {
+	s.traceContextMutex.Lock()
+	defer s.traceContextMutex.Unlock()
+
+	if s.traceContext == nil {
+		return nil
+	}
+
+	ctx := types.TraceContext{}
+	for k, v := range s.traceContext {
+		ctx[k] = v
+	}
+
+	return ctx
 }
 
 // Snapshot implements types.CommitMultiStore.
@@ -604,10 +626,9 @@ func (s *Store) Snapshot(height uint64, protoWriter protoio.Writer) error {
 	return nil
 }
 
-// TODO: impl tracer
 // TracingEnabled implements types.CommitMultiStore.
 func (s *Store) TracingEnabled() bool {
-	return false
+	return s.traceWriter != nil
 }
 
 // WorkingHash implements types.CommitMultiStore.
