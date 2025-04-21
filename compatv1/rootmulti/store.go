@@ -361,9 +361,9 @@ func (s *Store) PopStateCache() []*types.StoreKVPair {
 	return cache
 }
 
-// TODO: impl prune snapshot
 // PruneSnapshotHeight implements types.CommitMultiStore.
 func (s *Store) PruneSnapshotHeight(height int64) {
+	// Not applicable to store v2 pruning manager
 }
 
 func (s *Store) GetStoreByName(name string) types.Store {
@@ -523,9 +523,9 @@ func (s *Store) SetPruning(opt pruningtypes.PruningOptions) {
 	})
 }
 
-// TODO: update through snapshot manager
 // SetSnapshotInterval implements types.CommitMultiStore.
 func (s *Store) SetSnapshotInterval(snapshotInterval uint64) {
+	// Not applicable to store v2 pruning manager
 }
 
 // SetTracer implements types.CommitMultiStore.
