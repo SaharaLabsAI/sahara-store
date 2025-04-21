@@ -10,6 +10,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/log"
 	"cosmossdk.io/store/cachemulti"
+	"cosmossdk.io/store/listenkv"
 	"cosmossdk.io/store/mem"
 	"cosmossdk.io/store/metrics"
 	pruningtypes "cosmossdk.io/store/pruning/types"
@@ -45,6 +46,8 @@ type Store struct {
 	keysByName map[string]types.StoreKey
 	storeTypes map[types.StoreKey]types.StoreType
 	stores     map[types.StoreKey]types.CommitKVStore
+
+	listeners map[types.StoreKey]*types.MemoryListener
 }
 
 func NewStore(logger log.Logger, root store.RootStore) *Store {
@@ -56,6 +59,8 @@ func NewStore(logger log.Logger, root store.RootStore) *Store {
 		keysByName: make(map[string]types.StoreKey),
 		storeTypes: make(map[types.StoreKey]types.StoreType),
 		stores:     make(map[types.StoreKey]types.CommitKVStore),
+
+		listeners: make(map[types.StoreKey]*types.MemoryListener),
 	}
 }
 
@@ -63,27 +68,29 @@ func (s *Store) Close() error {
 	return s.root.Close()
 }
 
-// TODO: impl listener
 // AddListeners implements types.CommitMultiStore.
 func (s *Store) AddListeners(keys []types.StoreKey) {
+	for i := range keys {
+		listener := s.listeners[keys[i]]
+		if listener == nil {
+			s.listeners[keys[i]] = types.NewMemoryListener()
+		}
+	}
 }
 
 // CacheMultiStore implements types.CommitMultiStore.
 func (s *Store) CacheMultiStore() types.CacheMultiStore {
 	stores := make(map[types.StoreKey]types.CacheWrapper)
 	for k, v := range s.stores {
-		store := types.CacheWrapper(v)
-		if _, ok := store.(types.KVStore); !ok {
-			continue
-		}
+		store := types.KVStore(v)
 		if s.ListeningEnabled(k) {
-			// FIXME
-			// store = listenkv.NewStore(kv, k, s.li)
+			store = listenkv.NewStore(store, k, s.listeners[k])
 		}
 		stores[k] = store
 	}
 
-	return cachemulti.NewStore(nil, stores, nil, nil, nil)
+	// FIXME: tracer
+	return cachemulti.NewStore(nil, stores, s.keysByName, nil, nil)
 }
 
 // CacheMultiStoreWithVersion implements types.CommitMultiStore.
@@ -103,17 +110,19 @@ func (s *Store) CacheMultiStoreWithVersion(version int64) (types.CacheMultiStore
 			}
 
 			cacheStore = store
-			if s.ListeningEnabled(k) {
-				// FIXME
-				// store = listenkv.NewStore(kv, k, s.li)
-			}
 		default:
 			cacheStore = v
 		}
+
+		if s.ListeningEnabled(k) {
+			cacheStore = listenkv.NewStore(cacheStore, k, s.listeners[k])
+		}
+
 		stores[k] = cacheStore
 	}
 
-	return cachemulti.NewStore(nil, stores, nil, nil, nil), nil
+	// FIXME: tracer
+	return cachemulti.NewStore(nil, stores, s.keysByName, nil, nil), nil
 }
 
 // CacheWrap implements types.CommitMultiStore.
@@ -162,7 +171,22 @@ func (s *Store) GetCommitStore(key types.StoreKey) types.CommitStore {
 
 // GetKVStore implements types.CommitMultiStore.
 func (s *Store) GetKVStore(key types.StoreKey) types.KVStore {
-	return s.GetCommitKVStore(key)
+	kvs := s.GetCommitKVStore(key)
+	if s == nil {
+		panic(fmt.Sprintf("store does not exist for key: %s", key.Name()))
+	}
+
+	store := types.KVStore(kvs)
+
+	if s.TracingEnabled() {
+		// FIXME: tracer
+		// store = tracekv.NewStore(store, )
+	}
+	if s.ListeningEnabled(key) {
+		store = listenkv.NewStore(store, key, s.listeners[key])
+	}
+
+	return store
 }
 
 // TODO: impl pruning
@@ -204,9 +228,11 @@ func (s *Store) LatestVersion() int64 {
 	return int64(version)
 }
 
-// TODO: impl listener
 // ListeningEnabled implements types.CommitMultiStore.
 func (s *Store) ListeningEnabled(key types.StoreKey) bool {
+	if ls, ok := s.listeners[key]; ok {
+		return ls != nil
+	}
 	return false
 }
 
@@ -290,10 +316,19 @@ func (s *Store) MountStoreWithDB(key types.StoreKey, typ types.StoreType, _ db.D
 	s.storeTypes[key] = typ
 }
 
-// TODO: impl listener
 // PopStateCache implements types.CommitMultiStore.
 func (s *Store) PopStateCache() []*types.StoreKVPair {
-	return nil
+	var cache []*types.StoreKVPair
+	for key := range s.listeners {
+		ls := s.listeners[key]
+		if ls != nil {
+			cache = append(cache, ls.PopStateCache()...)
+		}
+	}
+	sort.SliceStable(cache, func(i, j int) bool {
+		return cache[i].StoreKey < cache[j].StoreKey
+	})
+	return cache
 }
 
 // TODO: impl prune snapshot
