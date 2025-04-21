@@ -36,7 +36,11 @@ type Store struct {
 }
 
 // LoadStore from given root store, the tree version is
-func LoadStore(root store.RootStore, storeKey types.StoreKey, metrics metrics.StoreMetrics) *Store {
+func LoadStore(root store.RootStore, storeKey types.StoreKey, storeMetrics metrics.StoreMetrics) *Store {
+	if storeMetrics == nil {
+		storeMetrics = metrics.NewNoOpMetrics()
+	}
+
 	tree, err := root.GetStateCommitment().(*commstore.CommitStore).GetTree(storeKey.Name())
 	if err != nil {
 		panic(err)
@@ -44,11 +48,15 @@ func LoadStore(root store.RootStore, storeKey types.StoreKey, metrics metrics.St
 
 	return &Store{
 		tree:    tree,
-		metrics: metrics,
+		metrics: storeMetrics,
 	}
 }
 
-func LoadStoreWithOpts(treeOpts iavl_v2.TreeOptions, dbOpts iavl_v2.SqliteDbOptions, log log.Logger, version int64, metrics metrics.StoreMetrics) (*Store, error) {
+func LoadStoreWithOpts(treeOpts iavl_v2.TreeOptions, dbOpts iavl_v2.SqliteDbOptions, log log.Logger, version int64, storeMetrics metrics.StoreMetrics) (*Store, error) {
+	if storeMetrics == nil {
+		storeMetrics = metrics.NewNoOpMetrics()
+	}
+
 	tree, err := commiavl.NewTree(treeOpts, dbOpts, log)
 	if err != nil {
 		return nil, err
@@ -60,7 +68,7 @@ func LoadStoreWithOpts(treeOpts iavl_v2.TreeOptions, dbOpts iavl_v2.SqliteDbOpti
 
 	return &Store{
 		tree:    tree,
-		metrics: metrics,
+		metrics: storeMetrics,
 	}, nil
 }
 
