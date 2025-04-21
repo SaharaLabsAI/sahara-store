@@ -7,15 +7,16 @@ toolchain go1.23.5
 replace (
 	github.com/SaharaLabsAI/sahara-store => ../
 	github.com/SaharaLabsAI/sahara-store/core => ../core
-	github.com/cosmos/iavl/v2 => ../../iavl
+	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.1
 )
 
 require (
+	cosmossdk.io/errors v1.0.1
 	cosmossdk.io/log v1.5.0
 	cosmossdk.io/store v1.1.1
-	github.com/SaharaLabsAI/sahara-store v0.0.0-20250407062823-6f10045d97e5
-	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250407062823-6f10045d97e5
-	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250407062823-6f10045d97e5
+	github.com/SaharaLabsAI/sahara-store v0.0.0-20250421065128-2ca4f0b9147e
+	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250421065128-2ca4f0b9147e
+	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250421065128-2ca4f0b9147e
 	github.com/cometbft/cometbft v0.38.17
 	github.com/cosmos/cosmos-db v1.1.1
 	github.com/cosmos/cosmos-sdk v0.50.13
@@ -29,7 +30,6 @@ require (
 	cosmossdk.io/collections v0.4.0 // indirect
 	cosmossdk.io/core v0.11.0 // indirect
 	cosmossdk.io/depinject v1.1.0 // indirect
-	cosmossdk.io/errors v1.0.1 // indirect
 	cosmossdk.io/errors/v2 v2.0.0 // indirect
 	cosmossdk.io/math v1.4.0 // indirect
 	cosmossdk.io/schema v1.0.0 // indirect

@@ -7,14 +7,14 @@ toolchain go1.23.5
 replace (
 	github.com/SaharaLabsAI/sahara-store/core => ./core
 	github.com/SaharaLabsAI/sahara-store/core/testing => ./core/testing
-	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl v1.0.0-beta.1.0.20250421023600-3537ae6e373a
+	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.1
 )
 
 require (
 	cosmossdk.io/errors/v2 v2.0.0
 	cosmossdk.io/log v1.5.0
-	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250407062823-6f10045d97e5
-	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250407062823-6f10045d97e5
+	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250421065128-2ca4f0b9147e
+	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250421065128-2ca4f0b9147e
 	github.com/cockroachdb/pebble v1.1.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/gogoproto v1.7.0
