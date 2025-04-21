@@ -7,6 +7,7 @@ import (
 	"github.com/cometbft/cometbft/proto/tendermint/crypto"
 
 	"cosmossdk.io/store/cachekv"
+	"cosmossdk.io/store/metrics"
 	pruningtypes "cosmossdk.io/store/pruning/types"
 	"cosmossdk.io/store/tracekv"
 	"cosmossdk.io/store/types"
@@ -14,7 +15,6 @@ import (
 	iavl_v2 "github.com/cosmos/iavl/v2"
 
 	store "github.com/SaharaLabsAI/sahara-store"
-	"github.com/SaharaLabsAI/sahara-store/commitment"
 	commstore "github.com/SaharaLabsAI/sahara-store/commitment"
 	commiavl "github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
 	"github.com/SaharaLabsAI/sahara-store/core/log"
@@ -31,22 +31,24 @@ var (
 )
 
 type Store struct {
-	tree commstore.CompatV1Tree
+	tree    commstore.CompatV1Tree
+	metrics metrics.StoreMetrics
 }
 
 // LoadStore from given root store, the tree version is
-func LoadStore(root store.RootStore, storeKey types.StoreKey) *Store {
+func LoadStore(root store.RootStore, storeKey types.StoreKey, metrics metrics.StoreMetrics) *Store {
 	tree, err := root.GetStateCommitment().(*commstore.CommitStore).GetTree(storeKey.Name())
 	if err != nil {
 		panic(err)
 	}
 
 	return &Store{
-		tree: tree,
+		tree:    tree,
+		metrics: metrics,
 	}
 }
 
-func LoadStoreWithOpts(treeOpts iavl_v2.TreeOptions, dbOpts iavl_v2.SqliteDbOptions, log log.Logger, version int64) (*Store, error) {
+func LoadStoreWithOpts(treeOpts iavl_v2.TreeOptions, dbOpts iavl_v2.SqliteDbOptions, log log.Logger, version int64, metrics metrics.StoreMetrics) (*Store, error) {
 	tree, err := commiavl.NewTree(treeOpts, dbOpts, log)
 	if err != nil {
 		return nil, err
@@ -57,18 +59,22 @@ func LoadStoreWithOpts(treeOpts iavl_v2.TreeOptions, dbOpts iavl_v2.SqliteDbOpti
 	}
 
 	return &Store{
-		tree: tree,
+		tree:    tree,
+		metrics: metrics,
 	}, nil
 }
 
 func UnsafeNewStore(tree commstore.CompatV1Tree) *Store {
 	return &Store{
-		tree: tree,
+		tree:    tree,
+		metrics: metrics.NewNoOpMetrics(),
 	}
 }
 
 // Commit implements types.CommitStore.
 func (s *Store) Commit() types.CommitID {
+	defer s.metrics.MeasureSince("store", "iavl", "commit")
+
 	hash, v, err := s.tree.Commit()
 	if err != nil {
 		panic(err)
@@ -115,6 +121,8 @@ func (s *Store) CacheWrapWithTrace(w io.Writer, tc types.TraceContext) types.Cac
 
 // Delete implements types.KVStore.
 func (s *Store) Delete(key []byte) {
+	defer s.metrics.MeasureSince("store", "iavl", "delete")
+
 	if err := s.tree.Remove(key); err != nil {
 		panic(err)
 	}
@@ -122,6 +130,8 @@ func (s *Store) Delete(key []byte) {
 
 // Get implements types.KVStore.
 func (s *Store) Get(key []byte) []byte {
+	defer s.metrics.MeasureSince("store", "iavl", "get")
+
 	val, err := s.tree.GetDirty(key)
 	if err != nil {
 		panic(err)
@@ -137,6 +147,8 @@ func (s *Store) GetStoreType() types.StoreType {
 
 // Has implements types.KVStore.
 func (s *Store) Has(key []byte) bool {
+	defer s.metrics.MeasureSince("store", "iavl", "has")
+
 	has, err := s.tree.HasDirty(key)
 	if err != nil {
 		panic(err)
@@ -183,7 +195,8 @@ func (s *Store) GetImmutable(version int64) (*Store, error) {
 	}
 
 	return &Store{
-		tree: imTree,
+		tree:    imTree,
+		metrics: s.metrics,
 	}, nil
 }
 
@@ -253,6 +266,8 @@ func prefixEndBytes(prefix []byte) []byte {
 }
 
 func (s *Store) Query(req *types.RequestQuery) (res *types.ResponseQuery, err error) {
+	defer s.metrics.MeasureSince("store", "iavl", "query")
+
 	if len(req.Data) == 0 {
 		return &types.ResponseQuery{}, types.ErrTxDecode.Wrap("query cannot be zero length")
 	}
@@ -341,6 +356,6 @@ func (s *Store) LoadVersionForOverwriting(version int64) error {
 	return s.tree.LoadVersionForOverwriting(uint64(version))
 }
 
-func (s *Store) Export(version int64) (commitment.Exporter, error) {
+func (s *Store) Export(version int64) (commstore.Exporter, error) {
 	return s.tree.Export(uint64(version))
 }

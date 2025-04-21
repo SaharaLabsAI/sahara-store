@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+	"github.com/SaharaLabsAI/sahara-store/metrics"
 )
 
 type CompatV1Tree interface {
@@ -39,4 +40,8 @@ func (c *CommitStore) GetImmutableTree(storeKey string, version uint64) (Tree, e
 	}
 
 	return tree.GetImmutable(version)
+}
+
+func (c *CommitStore) SetMetrics(metrics metrics.StoreMetrics) {
+	c.metrics = metrics
 }

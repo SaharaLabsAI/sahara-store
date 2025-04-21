@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"cosmossdk.io/store/cachekv"
+	storemetrics "cosmossdk.io/store/metrics"
 	"cosmossdk.io/store/types"
 	iavl_v2 "github.com/cosmos/iavl/v2"
 	"github.com/cosmos/iavl/v2/metrics"
@@ -98,38 +99,38 @@ func TestLoadStore(t *testing.T) {
 
 	// Querying an existing store at some previous non-pruned height H
 	nopLog := coretesting.NewNopLogger()
-	hStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(verH))
+	hStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(verH), storemetrics.NewNoOpMetrics())
 	require.NoError(t, err)
 	require.Equal(t, string(hStore.Get([]byte("hello"))), "hallo")
 	require.Equal(t, hStore.WorkingHash(), cIDH.Hash)
 	require.Equal(t, hStore.LastCommitID().Hash, cIDH.Hash)
 
 	// Querying an existing store at some previous pruned height Hp
-	hpStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(verHp))
+	hpStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(verHp), storemetrics.NewNoOpMetrics())
 	require.NoError(t, err)
 	require.Equal(t, string(hpStore.Get([]byte("hello"))), "hola")
 	require.Equal(t, hpStore.WorkingHash(), cIDHp.Hash)
 	require.Equal(t, hpStore.LastCommitID().Hash, cIDHp.Hash)
 
 	// Querying an existing store at current height Hc
-	hcStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(verHc))
+	hcStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(verHc), storemetrics.NewNoOpMetrics())
 	require.NoError(t, err)
 	require.Equal(t, string(hcStore.Get([]byte("hello"))), "ciao")
 	require.Equal(t, hcStore.WorkingHash(), cIDHc.Hash)
 	require.Equal(t, hcStore.LastCommitID().Hash, cIDHc.Hash)
 
 	// // Querying a new store at some previous non-pruned height H
-	newHStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(cIDH.Version))
+	newHStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(cIDH.Version), storemetrics.NewNoOpMetrics())
 	require.NoError(t, err)
 	require.Equal(t, string(newHStore.Get([]byte("hello"))), "hallo")
 
 	// Querying a new store at some previous pruned height Hp
-	newHpStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(cIDHp.Version))
+	newHpStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(cIDHp.Version), storemetrics.NewNoOpMetrics())
 	require.NoError(t, err)
 	require.Equal(t, string(newHpStore.Get([]byte("hello"))), "hola")
 
 	// Querying a new store at current height H
-	newHcStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(cIDHc.Version))
+	newHcStore, err := LoadStoreWithOpts(treeOpts, dbOpts, nopLog, int64(cIDHc.Version), storemetrics.NewNoOpMetrics())
 	require.NoError(t, err)
 	require.Equal(t, string(newHcStore.Get([]byte("hello"))), "ciao")
 }

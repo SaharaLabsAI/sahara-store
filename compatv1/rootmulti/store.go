@@ -29,7 +29,6 @@ import (
 	"github.com/SaharaLabsAI/sahara-store/root"
 
 	commstore "github.com/SaharaLabsAI/sahara-store/commitment"
-	"github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
 	compatiavl "github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
 	commsnapshottypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
 )
@@ -54,6 +53,8 @@ type Store struct {
 	traceContextMutex sync.Mutex
 
 	listeners map[types.StoreKey]*types.MemoryListener
+
+	metrics metrics.StoreMetrics
 }
 
 func NewStore(logger log.Logger, root store.RootStore) *Store {
@@ -165,7 +166,7 @@ func (s *Store) Commit() types.CommitID {
 
 // GetCommitKVStore implements types.CommitMultiStore.
 func (s *Store) GetCommitKVStore(key types.StoreKey) types.CommitKVStore {
-	return compatiavl.LoadStore(s.root, key)
+	return compatiavl.LoadStore(s.root, key, s.metrics)
 }
 
 // GetCommitStore implements types.CommitMultiStore.
@@ -373,7 +374,7 @@ loop:
 				}
 				importer.Close()
 			}
-			store, ok := s.GetStoreByName(item.Store.Name).(*iavl.Store)
+			store, ok := s.GetStoreByName(item.Store.Name).(*compatiavl.Store)
 			if !ok || store == nil {
 				return snapshottypes.SnapshotItem{}, errorsmod.Wrapf(types.ErrLogic, "cannot import into non-IAVL store %q", item.Store.Name)
 			}
@@ -483,10 +484,9 @@ func (s *Store) SetInterBlockCache(types.MultiStorePersistentCache) {
 	// Not applicable to store v2
 }
 
-// TODO; impl set metrics (must replace metrics from store v1)
 // SetMetrics implements types.CommitMultiStore.
 func (s *Store) SetMetrics(metrics metrics.StoreMetrics) {
-	// s.root.SetMetrics(metrics)
+	s.metrics = metrics
 }
 
 // TODO: Update through pruning manager
@@ -676,7 +676,7 @@ func (s *Store) loadCommitStoreFromParams(key types.StoreKey, typ types.StoreTyp
 	case types.StoreTypeMulti:
 		panic("recursive MultiStores not yet supported")
 	case types.StoreTypeIAVL:
-		return compatiavl.LoadStore(s.root, key), nil
+		return compatiavl.LoadStore(s.root, key, s.metrics), nil
 	case types.StoreTypeDB:
 		panic("recursive MultiStores not yet supported")
 	case types.StoreTypeTransient:
