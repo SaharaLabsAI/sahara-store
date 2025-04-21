@@ -335,3 +335,7 @@ func (s *Store) SetInitialVersion(version int64) error {
 func (s *Store) Import(version int64) (commstore.Importer, error) {
 	return s.tree.Import(uint64(version))
 }
+
+func (s *Store) LoadVersionForOverwriting(version int64) error {
+	return s.tree.LoadVersionForOverwriting(uint64(version))
+}

@@ -399,10 +399,30 @@ loop:
 	return snapshotItem, s.LoadLatestVersion()
 }
 
-// TODO: impl rollback, it's used when abci listenner throw an error
 // RollbackToVersion implements types.CommitMultiStore.
-func (s *Store) RollbackToVersion(version int64) error {
-	panic("unimplemented")
+func (s *Store) RollbackToVersion(target int64) error {
+	if target <= 0 {
+		return fmt.Errorf("invalid rollback height target: %d", target)
+	}
+
+	for key, store := range s.stores {
+		if store.GetStoreType() == types.StoreTypeIAVL {
+			// If the store is wrapped with an inter-block cache, we must first unwrap
+			// it to get the underlying IAVL store.
+			store = s.GetCommitKVStore(key)
+			err := store.(*compatiavl.Store).LoadVersionForOverwriting(target)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	_, err := s.root.Commit(&coretypes.Changeset{
+		Version: uint64(target),
+		Changes: make([]coretypes.StateChanges, 0),
+	})
+
+	return err
 }
 
 // SetIAVLCacheSize implements types.CommitMultiStore.
