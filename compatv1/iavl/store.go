@@ -14,6 +14,7 @@ import (
 	iavl_v2 "github.com/cosmos/iavl/v2"
 
 	store "github.com/SaharaLabsAI/sahara-store"
+	"github.com/SaharaLabsAI/sahara-store/commitment"
 	commstore "github.com/SaharaLabsAI/sahara-store/commitment"
 	commiavl "github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
 	"github.com/SaharaLabsAI/sahara-store/core/log"
@@ -338,4 +339,8 @@ func (s *Store) Import(version int64) (commstore.Importer, error) {
 
 func (s *Store) LoadVersionForOverwriting(version int64) error {
 	return s.tree.LoadVersionForOverwriting(uint64(version))
+}
+
+func (s *Store) Export(version int64) (commitment.Exporter, error) {
+	return s.tree.Export(uint64(version))
 }

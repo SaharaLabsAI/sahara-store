@@ -473,9 +473,99 @@ func (s *Store) SetTracingContext(types.TraceContext) types.MultiStore {
 	return nil
 }
 
-// TODO: impl snapshot
 // Snapshot implements types.CommitMultiStore.
 func (s *Store) Snapshot(height uint64, protoWriter protoio.Writer) error {
+	if height == 0 {
+		return errorsmod.Wrap(types.ErrLogic, "cannot snapshot height 0")
+	}
+	if height > uint64(s.LatestVersion()) {
+		return errorsmod.Wrapf(types.ErrLogic, "cannot snapshot future height %v", height)
+	}
+
+	// Collect stores to snapshot (only IAVL stores are supported)
+	type namedStore struct {
+		*compatiavl.Store
+		name string
+	}
+
+	stores := []namedStore{}
+	keys := keysFromStoreKeyMap(s.stores)
+	for _, key := range keys {
+		switch store := s.GetCommitKVStore(key).(type) {
+		case *compatiavl.Store:
+			stores = append(stores, namedStore{name: key.Name(), Store: store})
+		case *transient.Store, *mem.Store:
+			// Non-persisted stores shouldn't be snapshotted
+			continue
+		default:
+			return errorsmod.Wrapf(types.ErrLogic,
+				"don't know how to snapshot store %q of type %T", key.Name(), store)
+		}
+	}
+	sort.Slice(stores, func(i, j int) bool {
+		return strings.Compare(stores[i].name, stores[j].name) == -1
+	})
+
+	// Export each IAVL store. Stores are serialized as a stream of SnapshotItem Protobuf
+	// messages. The first item contains a SnapshotStore with store metadata (i.e. name),
+	// and the following messages contain a SnapshotNode (i.e. an ExportNode). Store changes
+	// are demarcated by new SnapshotStore items.
+	for _, store := range stores {
+		s.logger.Debug("starting snapshot", "store", store.name, "height", height)
+		exporter, err := store.Export(int64(height))
+		if err != nil {
+			s.logger.Error("snapshot failed; exporter error", "store", store.name, "err", err)
+			return err
+		}
+
+		err = func() error {
+			defer exporter.Close()
+
+			err := protoWriter.WriteMsg(&snapshottypes.SnapshotItem{
+				Item: &snapshottypes.SnapshotItem_Store{
+					Store: &snapshottypes.SnapshotStoreItem{
+						Name: store.name,
+					},
+				},
+			})
+			if err != nil {
+				s.logger.Error("snapshot failed; item store write failed", "store", store.name, "err", err)
+				return err
+			}
+
+			nodeCount := 0
+			for {
+				node, err := exporter.Next()
+				if err == commstore.ErrorExportDone {
+					s.logger.Debug("snapshot Done", "store", store.name, "nodeCount", nodeCount)
+					break
+				} else if err != nil {
+					return err
+				}
+				err = protoWriter.WriteMsg(&snapshottypes.SnapshotItem{
+					Item: &snapshottypes.SnapshotItem_IAVL{
+						IAVL: &snapshottypes.SnapshotIAVLItem{
+							Key:     node.Key,
+							Value:   node.Value,
+							Height:  int32(node.Height),
+							Version: node.Version,
+						},
+					},
+				})
+				if err != nil {
+					return err
+				}
+				nodeCount++
+			}
+
+			return nil
+		}()
+
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -565,27 +655,15 @@ func parsePath(path string) (storeName string, subpath string, err error) {
 	return storeName, subpath, nil
 }
 
-func prefixEndBytes(prefix []byte) []byte {
-	if len(prefix) == 0 {
-		return nil
+// keysFromStoreKeyMap returns a slice of keys for the provided map lexically sorted by StoreKey.Name()
+func keysFromStoreKeyMap[V any](m map[types.StoreKey]V) []types.StoreKey {
+	keys := make([]types.StoreKey, 0, len(m))
+	for key := range m {
+		keys = append(keys, key)
 	}
-
-	end := make([]byte, len(prefix))
-	copy(end, prefix)
-
-	for {
-		if end[len(end)-1] != byte(255) {
-			end[len(end)-1]++
-			break
-		}
-
-		end = end[:len(end)-1]
-
-		if len(end) == 0 {
-			end = nil
-			break
-		}
-	}
-
-	return end
+	sort.Slice(keys, func(i, j int) bool {
+		ki, kj := keys[i], keys[j]
+		return ki.Name() < kj.Name()
+	})
+	return keys
 }
