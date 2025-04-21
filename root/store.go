@@ -381,3 +381,11 @@ func (s *Store) handleMigration(cs *corestore.Changeset) error {
 func (s *Store) Prune(version uint64) error {
 	return s.pruningManager.Prune(version)
 }
+
+func (s *Store) GetPruningOption() *store.PruningOption {
+	return s.pruningManager.GetPruningOption()
+}
+
+func (s *Store) SetPruningOption(opt store.PruningOption) {
+	s.pruningManager.SetPruningOption(opt)
+}

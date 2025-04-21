@@ -193,10 +193,36 @@ func (s *Store) GetKVStore(key types.StoreKey) types.KVStore {
 	return store
 }
 
-// TODO: impl pruning
 // GetPruning implements types.CommitMultiStore.
 func (s *Store) GetPruning() pruningtypes.PruningOptions {
-	return pruningtypes.NewPruningOptions(pruningtypes.PruningNothing)
+	opt := s.root.GetPruningOption()
+
+	switch opt.KeepRecent {
+	case store.NewPruningOption(store.PruningDefault).KeepRecent:
+		return pruningtypes.PruningOptions{
+			KeepRecent: opt.KeepRecent,
+			Interval:   opt.Interval,
+			Strategy:   pruningtypes.PruningDefault,
+		}
+	case store.NewPruningOption(store.PruningEverything).KeepRecent:
+		return pruningtypes.PruningOptions{
+			KeepRecent: opt.KeepRecent,
+			Interval:   opt.Interval,
+			Strategy:   pruningtypes.PruningEverything,
+		}
+	case store.NewPruningOption(store.PruningNothing).KeepRecent:
+		return pruningtypes.PruningOptions{
+			KeepRecent: opt.KeepRecent,
+			Interval:   opt.Interval,
+			Strategy:   pruningtypes.PruningNothing,
+		}
+	default:
+		return pruningtypes.PruningOptions{
+			KeepRecent: opt.KeepRecent,
+			Interval:   opt.Interval,
+			Strategy:   pruningtypes.PruningCustom,
+		}
+	}
 }
 
 // GetStore implements types.CommitMultiStore.
@@ -489,9 +515,12 @@ func (s *Store) SetMetrics(metrics metrics.StoreMetrics) {
 	s.metrics = metrics
 }
 
-// TODO: Update through pruning manager
 // SetPruning implements types.CommitMultiStore.
-func (s *Store) SetPruning(pruningtypes.PruningOptions) {
+func (s *Store) SetPruning(opt pruningtypes.PruningOptions) {
+	s.root.SetPruningOption(store.PruningOption{
+		KeepRecent: opt.KeepRecent,
+		Interval:   opt.Interval,
+	})
 }
 
 // TODO: update through snapshot manager

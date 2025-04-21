@@ -1,7 +1,7 @@
 package pruning
 
 import (
-	"github.com/SaharaLabsAI/sahara-store"
+	store "github.com/SaharaLabsAI/sahara-store"
 )
 
 // Manager is a struct that manages the pruning of old versions of the SC and SS.
@@ -49,4 +49,13 @@ func (m *Manager) PausePruning() {
 func (m *Manager) ResumePruning(version uint64) error {
 	m.signalPruning(false)
 	return m.Prune(version)
+}
+
+func (m *Manager) GetPruningOption() *store.PruningOption {
+	return m.scPruningOption
+}
+
+func (m *Manager) SetPruningOption(opt store.PruningOption) {
+	m.scPruningOption.KeepRecent = opt.KeepRecent
+	m.scPruningOption.Interval = opt.Interval
 }

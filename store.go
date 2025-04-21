@@ -13,6 +13,7 @@ var MaxWriteParallelism = 16
 // RootStore defines an abstraction layer containing a State Storage (SS) engine
 // and one or more State Commitment (SC) engines.
 type RootStore interface {
+	PrunnerOption
 	Pruner
 	Backend
 
@@ -97,4 +98,9 @@ type QueryResult struct {
 	Value    []byte
 	Version  uint64
 	ProofOps []proof.CommitmentOp
+}
+
+type PrunnerOption interface {
+	GetPruningOption() *PruningOption
+	SetPruningOption(PruningOption)
 }
