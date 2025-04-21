@@ -21,17 +21,18 @@ func SetupStoreIAVL2(
 	homePath string,
 	baseAppOptions []func(*baseapp.BaseApp),
 	storeKeyNames []string,
+	appDBBackend dbm.BackendType,
 ) []func(*baseapp.BaseApp) {
-	baseAppOptions = append([]func(*baseapp.BaseApp){setup(logger, db, homePath, storeKeyNames)}, baseAppOptions...)
+	baseAppOptions = append([]func(*baseapp.BaseApp){setup(logger, db, homePath, storeKeyNames, appDBBackend)}, baseAppOptions...)
 
 	return baseAppOptions
 }
 
-func setup(logger log.Logger, db dbm.DB, homePath string, storeKeyNames []string) func(*baseapp.BaseApp) {
+func setup(logger log.Logger, db dbm.DB, homePath string, storeKeyNames []string, appDBBackend dbm.BackendType) func(*baseapp.BaseApp) {
 	return func(bapp *baseapp.BaseApp) {
 		config := &root.Config{
 			Home:         homePath,
-			AppDBBackend: "pebbledb",
+			AppDBBackend: string(appDBBackend),
 			Options: root.Options{
 				SCType:          root.SCTypeIavlV2,
 				SCPruningOption: store.NewPruningOption(store.PruningNothing),
