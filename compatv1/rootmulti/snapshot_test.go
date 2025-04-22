@@ -12,7 +12,6 @@ import (
 
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/stretchr/testify/require"
-	"gotest.tools/v3/assert"
 
 	"cosmossdk.io/log"
 	snapshottypes "cosmossdk.io/store/snapshots/types"
@@ -160,7 +159,7 @@ func newMultiStoreWithMixedMountsAndBasicData(db dbm.DB, home string) *Store {
 
 func assertStoresEqual(t *testing.T, expect, actual types.CommitKVStore, msgAndArgs ...interface{}) {
 	t.Helper()
-	assert.Equal(t, expect.LastCommitID(), actual.LastCommitID())
+	require.Equal(t, expect.LastCommitID(), actual.LastCommitID())
 	expectIter := expect.Iterator(nil, nil)
 	expectMap := map[string][]byte{}
 	for ; expectIter.Valid(); expectIter.Next() {
@@ -175,7 +174,7 @@ func assertStoresEqual(t *testing.T, expect, actual types.CommitKVStore, msgAndA
 	}
 	require.NoError(t, actualIter.Error())
 
-	assert.Equal(t, expectMap, actualMap, msgAndArgs...)
+	require.Equal(t, expectMap, actualMap, msgAndArgs...)
 }
 
 func TestMultistoreSnapshot_Checksum(t *testing.T) {
@@ -278,7 +277,7 @@ func TestMultistoreSnapshotRestore(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, *dummyExtensionItem.GetExtension(), *nextItem.GetExtension())
 
-	assert.Equal(t, source.LastCommitID(), target.LastCommitID())
+	require.Equal(t, source.LastCommitID(), target.LastCommitID())
 	for _, key := range source.StoreKeysByName() {
 		sourceStore := source.GetStoreByName(key.Name()).(types.CommitKVStore)
 		targetStore := target.GetStoreByName(key.Name()).(types.CommitKVStore)

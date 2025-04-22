@@ -459,15 +459,7 @@ loop:
 		importer.Close()
 	}
 
-	_, err := s.root.Commit(&coretypes.Changeset{
-		Version: height,
-		Changes: make([]coretypes.StateChanges, 0),
-	})
-	if err != nil {
-		return snapshottypes.SnapshotItem{}, err
-	}
-
-	return snapshotItem, s.LoadLatestVersion()
+	return snapshotItem, s.LoadVersion(int64(height))
 }
 
 // RollbackToVersion implements types.CommitMultiStore.
