@@ -25,7 +25,7 @@ import (
 	compatiavl "github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
 )
 
-func newMultiStoreWithGeneratedData(t *testing.T, db dbm.DB, stores uint8, storeKeys uint64, home string) *Store {
+func newMultiStoreWithGeneratedData(db dbm.DB, stores uint8, storeKeys uint64, home string) *Store {
 	builder := root.NewBuilder()
 
 	keys := []*types.KVStoreKey{}
@@ -48,7 +48,7 @@ func newMultiStoreWithGeneratedData(t *testing.T, db dbm.DB, stores uint8, store
 		},
 	}
 
-	logger := log.NewTestLogger(t)
+	logger := log.NewNopLogger()
 	root, err := builder.BuildWithDB(logger, db, config)
 	if err != nil {
 		panic(err)
@@ -182,7 +182,7 @@ func TestMultistoreSnapshot_Checksum(t *testing.T) {
 	// This checksum test makes sure that the byte stream remains identical. If the test fails
 	// without having changed the data (e.g. because the Protobuf or zlib encoding changes),
 	// snapshottypes.CurrentFormat must be bumped.
-	store := newMultiStoreWithGeneratedData(t, dbm.NewMemDB(), 5, 10000, t.TempDir())
+	store := newMultiStoreWithGeneratedData(dbm.NewMemDB(), 5, 10000, t.TempDir())
 	version := uint64(store.LastCommitID().Version)
 
 	testcases := []struct {
@@ -291,89 +291,141 @@ func TestMultistoreSnapshotRestore(t *testing.T) {
 	}
 }
 
-// func benchmarkMultistoreSnapshot(b *testing.B, stores uint8, storeKeys uint64) {
-// 	b.Helper()
-// 	b.Skip("Noisy with slow setup time, please see https://github.com/cosmos/cosmos-sdk/issues/8855.")
-//
-// 	b.ReportAllocs()
-// 	b.StopTimer()
-// 	source := newMultiStoreWithGeneratedData(dbm.NewMemDB(), stores, storeKeys)
-// 	version := source.LastCommitID().Version
-// 	require.EqualValues(b, 1, version)
-// 	b.StartTimer()
-//
-// 	for i := 0; i < b.N; i++ {
-// 		target := rootmulti.NewStore(dbm.NewMemDB(), log.NewNopLogger(), metrics.NewNoOpMetrics())
-// 		for _, key := range source.StoreKeysByName() {
-// 			target.MountStoreWithDB(key, types.StoreTypeIAVL, nil)
-// 		}
-// 		err := target.LoadLatestVersion()
-// 		require.NoError(b, err)
-// 		require.EqualValues(b, 0, target.LastCommitID().Version)
-//
-// 		chunks := make(chan io.ReadCloser)
-// 		go func() {
-// 			streamWriter := snapshots.NewStreamWriter(chunks)
-// 			require.NotNil(b, streamWriter)
-// 			err := source.Snapshot(uint64(version), streamWriter)
-// 			require.NoError(b, err)
-// 		}()
-// 		for reader := range chunks {
-// 			_, err := io.Copy(io.Discard, reader)
-// 			require.NoError(b, err)
-// 			err = reader.Close()
-// 			require.NoError(b, err)
-// 		}
-// 	}
-// }
-//
-// func benchmarkMultistoreSnapshotRestore(b *testing.B, stores uint8, storeKeys uint64) {
-// 	b.Helper()
-// 	b.Skip("Noisy with slow setup time, please see https://github.com/cosmos/cosmos-sdk/issues/8855.")
-//
-// 	b.ReportAllocs()
-// 	b.StopTimer()
-// 	source := newMultiStoreWithGeneratedData(dbm.NewMemDB(), stores, storeKeys)
-// 	version := uint64(source.LastCommitID().Version)
-// 	require.EqualValues(b, 1, version)
-// 	b.StartTimer()
-//
-// 	for i := 0; i < b.N; i++ {
-// 		target := rootmulti.NewStore(dbm.NewMemDB(), log.NewNopLogger(), metrics.NewNoOpMetrics())
-// 		for _, key := range source.StoreKeysByName() {
-// 			target.MountStoreWithDB(key, types.StoreTypeIAVL, nil)
-// 		}
-// 		err := target.LoadLatestVersion()
-// 		require.NoError(b, err)
-// 		require.EqualValues(b, 0, target.LastCommitID().Version)
-//
-// 		chunks := make(chan io.ReadCloser)
-// 		go func() {
-// 			writer := snapshots.NewStreamWriter(chunks)
-// 			require.NotNil(b, writer)
-// 			err := source.Snapshot(version, writer)
-// 			require.NoError(b, err)
-// 		}()
-// 		reader, err := snapshots.NewStreamReader(chunks)
-// 		require.NoError(b, err)
-// 		_, err = target.Restore(version, snapshottypes.CurrentFormat, reader)
-// 		require.NoError(b, err)
-// 		require.Equal(b, source.LastCommitID(), target.LastCommitID())
-// 	}
-// }
-//
-// func BenchmarkMultistoreSnapshot100K(b *testing.B) {
-// 	benchmarkMultistoreSnapshot(b, 10, 10000)
-// }
-//
-// func BenchmarkMultistoreSnapshot1M(b *testing.B) {
-// 	benchmarkMultistoreSnapshot(b, 10, 100000)
-// }
-//
-// func BenchmarkMultistoreSnapshotRestore100K(b *testing.B) {
-// 	benchmarkMultistoreSnapshotRestore(b, 10, 10000)
-// }
-//
-// func BenchmarkMultistoreSnapshotRestore1M(b *testing.B) {
-// 	benchmarkMultistoreSnapshotRestore(b, 10, 100000)
-// }
+func benchmarkMultistoreSnapshot(b *testing.B, stores uint8, storeKeys uint64) {
+	b.Helper()
+	b.Skip("Noisy with slow setup time, please see https://github.com/cosmos/cosmos-sdk/issues/8855.")
+
+	b.ReportAllocs()
+	b.StopTimer()
+	source := newMultiStoreWithGeneratedData(dbm.NewMemDB(), stores, storeKeys, b.TempDir())
+	version := source.LastCommitID().Version
+	require.EqualValues(b, 1, version)
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		builder := root.NewBuilder()
+
+		for _, key := range source.StoreKeysByName() {
+			builder.RegisterKey(key.Name())
+		}
+
+		config := &root.Config{
+			Home:         b.TempDir(),
+			AppDBBackend: "pebbledb",
+			Options: root.Options{
+				SCType: root.SCTypeIavlV2,
+				SCPruningOption: &store.PruningOption{
+					KeepRecent: 0,
+					Interval:   0,
+				},
+				IavlV2Config: iavlv2.DefaultOptions(),
+			},
+		}
+
+		logger := log.NewNopLogger()
+		root, err := builder.BuildWithDB(logger, dbm.NewMemDB(), config)
+		if err != nil {
+			panic(err)
+		}
+
+		target := NewStore(logger, root)
+		for _, key := range source.StoreKeysByName() {
+			target.MountStoreWithDB(key, types.StoreTypeIAVL, nil)
+		}
+
+		err = target.LoadLatestVersion()
+		require.NoError(b, err)
+		require.EqualValues(b, 0, target.LastCommitID().Version)
+
+		chunks := make(chan io.ReadCloser)
+		go func() {
+			streamWriter := snapshots.NewStreamWriter(chunks)
+			require.NotNil(b, streamWriter)
+			err := source.Snapshot(uint64(version), streamWriter)
+			require.NoError(b, err)
+		}()
+		for reader := range chunks {
+			_, err := io.Copy(io.Discard, reader)
+			require.NoError(b, err)
+			err = reader.Close()
+			require.NoError(b, err)
+		}
+	}
+}
+
+func benchmarkMultistoreSnapshotRestore(b *testing.B, stores uint8, storeKeys uint64) {
+	b.Helper()
+	b.Skip("Noisy with slow setup time, please see https://github.com/cosmos/cosmos-sdk/issues/8855.")
+
+	b.ReportAllocs()
+	b.StopTimer()
+	source := newMultiStoreWithGeneratedData(dbm.NewMemDB(), stores, storeKeys, b.TempDir())
+	version := uint64(source.LastCommitID().Version)
+	require.EqualValues(b, 1, version)
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		builder := root.NewBuilder()
+
+		for _, key := range source.StoreKeysByName() {
+			builder.RegisterKey(key.Name())
+		}
+
+		config := &root.Config{
+			Home:         b.TempDir(),
+			AppDBBackend: "pebbledb",
+			Options: root.Options{
+				SCType: root.SCTypeIavlV2,
+				SCPruningOption: &store.PruningOption{
+					KeepRecent: 0,
+					Interval:   0,
+				},
+				IavlV2Config: iavlv2.DefaultOptions(),
+			},
+		}
+
+		logger := log.NewNopLogger()
+		root, err := builder.BuildWithDB(logger, dbm.NewMemDB(), config)
+		if err != nil {
+			panic(err)
+		}
+
+		target := NewStore(logger, root)
+		for _, key := range source.StoreKeysByName() {
+			target.MountStoreWithDB(key, types.StoreTypeIAVL, nil)
+		}
+
+		err = target.LoadLatestVersion()
+		require.NoError(b, err)
+		require.EqualValues(b, 0, target.LastCommitID().Version)
+
+		chunks := make(chan io.ReadCloser)
+		go func() {
+			writer := snapshots.NewStreamWriter(chunks)
+			require.NotNil(b, writer)
+			err := source.Snapshot(version, writer)
+			require.NoError(b, err)
+		}()
+		reader, err := snapshots.NewStreamReader(chunks)
+		require.NoError(b, err)
+		_, err = target.Restore(version, snapshottypes.CurrentFormat, reader)
+		require.NoError(b, err)
+		require.Equal(b, source.LastCommitID(), target.LastCommitID())
+	}
+}
+
+func BenchmarkMultistoreSnapshot100K(b *testing.B) {
+	benchmarkMultistoreSnapshot(b, 10, 10000)
+}
+
+func BenchmarkMultistoreSnapshot1M(b *testing.B) {
+	benchmarkMultistoreSnapshot(b, 10, 100000)
+}
+
+func BenchmarkMultistoreSnapshotRestore100K(b *testing.B) {
+	benchmarkMultistoreSnapshotRestore(b, 10, 10000)
+}
+
+func BenchmarkMultistoreSnapshotRestore1M(b *testing.B) {
+	benchmarkMultistoreSnapshotRestore(b, 10, 100000)
+}
