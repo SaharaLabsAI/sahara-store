@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -14,16 +15,18 @@ import (
 	"gotest.tools/v3/assert"
 
 	"cosmossdk.io/log"
+	snapshottypes "cosmossdk.io/store/snapshots/types"
 	"cosmossdk.io/store/types"
 
 	store "github.com/SaharaLabsAI/sahara-store"
 	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
-	compatiavl "github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
 	"github.com/SaharaLabsAI/sahara-store/root"
 	"github.com/SaharaLabsAI/sahara-store/snapshots"
+
+	compatiavl "github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
 )
 
-func newMultiStoreWithGeneratedData(db dbm.DB, stores uint8, storeKeys uint64, home string) *Store {
+func newMultiStoreWithGeneratedData(t *testing.T, db dbm.DB, stores uint8, storeKeys uint64, home string) *Store {
 	builder := root.NewBuilder()
 
 	keys := []*types.KVStoreKey{}
@@ -46,19 +49,19 @@ func newMultiStoreWithGeneratedData(db dbm.DB, stores uint8, storeKeys uint64, h
 		},
 	}
 
-	root, err := builder.BuildWithDB(log.NewNopLogger(), db, config)
+	logger := log.NewTestLogger(t)
+	root, err := builder.BuildWithDB(logger, db, config)
 	if err != nil {
 		panic(err)
 	}
 
-	multiStore := NewStore(log.NewNopLogger(), root)
+	multiStore := NewStore(logger, root)
 
 	r := rand.New(rand.NewSource(49872768940)) // Fixed seed for deterministic tests
 
 	for i := uint8(0); i < stores; i++ {
 		key := types.NewKVStoreKey(fmt.Sprintf("store%v", i))
 		multiStore.MountStoreWithDB(key, types.StoreTypeIAVL, nil)
-		keys = append(keys, key)
 	}
 
 	err = multiStore.LoadLatestVersion()
@@ -81,6 +84,7 @@ func newMultiStoreWithGeneratedData(db dbm.DB, stores uint8, storeKeys uint64, h
 	}
 
 	multiStore.Commit()
+
 	err = multiStore.LoadLatestVersion()
 	if err != nil {
 		panic(err)
@@ -179,7 +183,7 @@ func TestMultistoreSnapshot_Checksum(t *testing.T) {
 	// This checksum test makes sure that the byte stream remains identical. If the test fails
 	// without having changed the data (e.g. because the Protobuf or zlib encoding changes),
 	// snapshottypes.CurrentFormat must be bumped.
-	store := newMultiStoreWithGeneratedData(dbm.NewMemDB(), 5, 10000, t.TempDir())
+	store := newMultiStoreWithGeneratedData(t, dbm.NewMemDB(), 5, 10000, t.TempDir())
 	version := uint64(store.LastCommitID().Version)
 
 	testcases := []struct {
@@ -220,74 +224,74 @@ func TestMultistoreSnapshot_Checksum(t *testing.T) {
 	}
 }
 
-// func TestMultistoreSnapshot_Errors(t *testing.T) {
-// 	store := newMultiStoreWithMixedMountsAndBasicData(dbm.NewMemDB())
-//
-// 	testcases := map[string]struct {
-// 		height     uint64
-// 		expectType error
-// 	}{
-// 		"0 height":       {0, nil},
-// 		"unknown height": {9, nil},
-// 	}
-// 	for name, tc := range testcases {
-// 		tc := tc
-// 		t.Run(name, func(t *testing.T) {
-// 			err := store.Snapshot(tc.height, nil)
-// 			require.Error(t, err)
-// 			if tc.expectType != nil {
-// 				assert.True(t, errors.Is(err, tc.expectType))
-// 			}
-// 		})
-// 	}
-// }
-//
-// func TestMultistoreSnapshotRestore(t *testing.T) {
-// 	source := newMultiStoreWithMixedMountsAndBasicData(dbm.NewMemDB())
-// 	target := newMultiStoreWithMixedMounts(dbm.NewMemDB())
-// 	version := uint64(source.LastCommitID().Version)
-// 	require.EqualValues(t, 3, version)
-// 	dummyExtensionItem := snapshottypes.SnapshotItem{
-// 		Item: &snapshottypes.SnapshotItem_Extension{
-// 			Extension: &snapshottypes.SnapshotExtensionMeta{
-// 				Name:   "test",
-// 				Format: 1,
-// 			},
-// 		},
-// 	}
-//
-// 	chunks := make(chan io.ReadCloser, 100)
-// 	go func() {
-// 		streamWriter := snapshots.NewStreamWriter(chunks)
-// 		require.NotNil(t, streamWriter)
-// 		defer streamWriter.Close()
-// 		err := source.Snapshot(version, streamWriter)
-// 		require.NoError(t, err)
-// 		// write an extension metadata
-// 		err = streamWriter.WriteMsg(&dummyExtensionItem)
-// 		require.NoError(t, err)
-// 	}()
-//
-// 	streamReader, err := snapshots.NewStreamReader(chunks)
-// 	require.NoError(t, err)
-// 	nextItem, err := target.Restore(version, snapshottypes.CurrentFormat, streamReader)
-// 	require.NoError(t, err)
-// 	require.Equal(t, *dummyExtensionItem.GetExtension(), *nextItem.GetExtension())
-//
-// 	assert.Equal(t, source.LastCommitID(), target.LastCommitID())
-// 	for _, key := range source.StoreKeysByName() {
-// 		sourceStore := source.GetStoreByName(key.Name()).(types.CommitKVStore)
-// 		targetStore := target.GetStoreByName(key.Name()).(types.CommitKVStore)
-// 		switch sourceStore.GetStoreType() {
-// 		case types.StoreTypeTransient:
-// 			assert.False(t, targetStore.Iterator(nil, nil).Valid(),
-// 				"transient store %v not empty", key.Name())
-// 		default:
-// 			assertStoresEqual(t, sourceStore, targetStore, "store %q not equal", key.Name())
-// 		}
-// 	}
-// }
-//
+func TestMultistoreSnapshot_Errors(t *testing.T) {
+	store := newMultiStoreWithMixedMountsAndBasicData(dbm.NewMemDB(), t.TempDir())
+
+	testcases := map[string]struct {
+		height     uint64
+		expectType error
+	}{
+		"0 height":       {0, nil},
+		"unknown height": {9, nil},
+	}
+	for name, tc := range testcases {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			err := store.Snapshot(tc.height, nil)
+			require.Error(t, err)
+			if tc.expectType != nil {
+				require.True(t, errors.Is(err, tc.expectType))
+			}
+		})
+	}
+}
+
+func TestMultistoreSnapshotRestore(t *testing.T) {
+	source := newMultiStoreWithMixedMountsAndBasicData(dbm.NewMemDB(), t.TempDir())
+	target := newMultiStoreWithMixedMounts(dbm.NewMemDB(), t.TempDir())
+	version := uint64(source.LastCommitID().Version)
+	require.EqualValues(t, 3, version)
+	dummyExtensionItem := snapshottypes.SnapshotItem{
+		Item: &snapshottypes.SnapshotItem_Extension{
+			Extension: &snapshottypes.SnapshotExtensionMeta{
+				Name:   "test",
+				Format: 1,
+			},
+		},
+	}
+
+	chunks := make(chan io.ReadCloser, 100)
+	go func() {
+		streamWriter := snapshots.NewStreamWriter(chunks)
+		require.NotNil(t, streamWriter)
+		defer streamWriter.Close()
+		err := source.Snapshot(version, streamWriter)
+		require.NoError(t, err)
+		// write an extension metadata
+		err = streamWriter.WriteMsg(&dummyExtensionItem)
+		require.NoError(t, err)
+	}()
+
+	streamReader, err := snapshots.NewStreamReader(chunks)
+	require.NoError(t, err)
+	nextItem, err := target.Restore(version, snapshottypes.CurrentFormat, streamReader)
+	require.NoError(t, err)
+	require.Equal(t, *dummyExtensionItem.GetExtension(), *nextItem.GetExtension())
+
+	assert.Equal(t, source.LastCommitID(), target.LastCommitID())
+	for _, key := range source.StoreKeysByName() {
+		sourceStore := source.GetStoreByName(key.Name()).(types.CommitKVStore)
+		targetStore := target.GetStoreByName(key.Name()).(types.CommitKVStore)
+		switch sourceStore.GetStoreType() {
+		case types.StoreTypeTransient:
+			require.False(t, targetStore.Iterator(nil, nil).Valid(),
+				"transient store %v not empty", key.Name())
+		default:
+			assertStoresEqual(t, sourceStore, targetStore, "store %q not equal", key.Name())
+		}
+	}
+}
+
 // func benchmarkMultistoreSnapshot(b *testing.B, stores uint8, storeKeys uint64) {
 // 	b.Helper()
 // 	b.Skip("Noisy with slow setup time, please see https://github.com/cosmos/cosmos-sdk/issues/8855.")

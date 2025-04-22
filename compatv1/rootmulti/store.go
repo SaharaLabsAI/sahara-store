@@ -29,8 +29,9 @@ import (
 	"github.com/SaharaLabsAI/sahara-store/root"
 
 	commstore "github.com/SaharaLabsAI/sahara-store/commitment"
-	compatiavl "github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
 	commsnapshottypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
+
+	compatiavl "github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
 )
 
 var (
@@ -166,7 +167,12 @@ func (s *Store) Commit() types.CommitID {
 
 // GetCommitKVStore implements types.CommitMultiStore.
 func (s *Store) GetCommitKVStore(key types.StoreKey) types.CommitKVStore {
-	return compatiavl.LoadStore(s.root, key, s.metrics)
+	storeKey, ok := s.keysByName[key.Name()]
+	if !ok {
+		panic(fmt.Sprintf("store %s not found", key.Name()))
+	}
+
+	return s.stores[storeKey]
 }
 
 // GetCommitStore implements types.CommitMultiStore.
@@ -698,6 +704,10 @@ func (s *Store) Query(req *types.RequestQuery) (*types.ResponseQuery, error) {
 
 	req.Path = subpath
 	return store.(*compatiavl.Store).Query(req)
+}
+
+func (rs *Store) StoreKeysByName() map[string]types.StoreKey {
+	return rs.keysByName
 }
 
 func (s *Store) loadCommitStoreFromParams(key types.StoreKey, typ types.StoreType) (types.CommitKVStore, error) {
