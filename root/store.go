@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/SaharaLabsAI/sahara-store/commitment"
 	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 
@@ -388,4 +389,14 @@ func (s *Store) GetPruningOption() *store.PruningOption {
 
 func (s *Store) SetPruningOption(opt store.PruningOption) {
 	s.pruningManager.SetPruningOption(opt)
+}
+
+func (s *Store) FlushCommitInfo(ci *proof.CommitInfo) error {
+	if err := s.stateCommitment.(*commitment.CommitStore).FlushCommitInfo(ci); err != nil {
+		return err
+	}
+
+	s.lastCommitInfo = ci
+
+	return nil
 }

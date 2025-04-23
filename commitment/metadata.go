@@ -103,7 +103,7 @@ func (m *MetadataStore) flushCommitInfo(version uint64, cInfo *proof.CommitInfo)
 		return err
 	}
 
-	if err := batch.WriteSync(); err != nil {
+	if err := batch.Write(); err != nil {
 		return err
 	}
 	return nil
@@ -121,7 +121,7 @@ func (m *MetadataStore) flushRemovedStoreKeys(version uint64, storeKeys []string
 			return err
 		}
 	}
-	return batch.WriteSync()
+	return batch.Write()
 }
 
 func (m *MetadataStore) GetRemovedStoreKeys(version uint64) (storeKeys [][]byte, err error) {
@@ -165,7 +165,7 @@ func (m *MetadataStore) deleteRemovedStoreKeys(version uint64, removeStore func(
 		}
 	}
 
-	return batch.WriteSync()
+	return batch.Write()
 }
 
 func (m *MetadataStore) deleteCommitInfo(version uint64) error {

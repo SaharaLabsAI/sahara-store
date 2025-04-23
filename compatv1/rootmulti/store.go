@@ -459,6 +459,16 @@ loop:
 		importer.Close()
 	}
 
+	ci, err := s.root.GetStateCommitment().GetCommitInfo(height)
+	if err != nil {
+		return snapshottypes.SnapshotItem{}, errorsmod.Wrap(err, "IAVL get commit info failed")
+	}
+
+	err = s.root.(*root.Store).FlushCommitInfo(ci)
+	if err != nil {
+		return snapshottypes.SnapshotItem{}, errorsmod.Wrap(err, "Root store commit metadata failed")
+	}
+
 	return snapshotItem, s.LoadVersion(int64(height))
 }
 

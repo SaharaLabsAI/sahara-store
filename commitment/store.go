@@ -649,3 +649,7 @@ func (c *CommitStore) Close() error {
 	}
 	return nil
 }
+
+func (c *CommitStore) FlushCommitInfo(ci *proof.CommitInfo) error {
+	return c.metadata.flushCommitInfo(ci.Version, ci)
+}
