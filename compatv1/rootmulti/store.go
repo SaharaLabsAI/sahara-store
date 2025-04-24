@@ -383,6 +383,10 @@ func (s *Store) GetStoreByName(name string) types.Store {
 
 // Restore implements types.CommitMultiStore.
 func (s *Store) Restore(height uint64, format uint32, protoReader protoio.Reader) (snapshottypes.SnapshotItem, error) {
+	if db.ForceSync == "0" {
+		s.logger.Warn("ForceSync isn't enabled, metadata may lost for pebbledb")
+	}
+
 	var (
 		importer     commstore.Importer
 		snapshotItem snapshottypes.SnapshotItem
