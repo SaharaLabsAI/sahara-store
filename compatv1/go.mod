@@ -7,7 +7,7 @@ toolchain go1.23.5
 replace (
 	github.com/SaharaLabsAI/sahara-store => ../
 	github.com/SaharaLabsAI/sahara-store/core => ../core
-	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.3
+	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.4
 )
 
 require (
@@ -23,6 +23,7 @@ require (
 	github.com/cosmos/gogoproto v1.7.0
 	github.com/cosmos/iavl/v2 v2.0.0-alpha.4
 	github.com/stretchr/testify v1.10.0
+	golang.org/x/sync v0.10.0
 )
 
 require (
@@ -158,7 +159,6 @@ require (
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/term v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
