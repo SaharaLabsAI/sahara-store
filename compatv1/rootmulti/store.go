@@ -19,6 +19,7 @@ import (
 	"cosmossdk.io/store/tracekv"
 	"cosmossdk.io/store/transient"
 	"cosmossdk.io/store/types"
+	"golang.org/x/sync/errgroup"
 
 	db "github.com/cosmos/cosmos-db"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -106,26 +107,53 @@ func (s *Store) CacheMultiStoreWithVersion(version int64) (types.CacheMultiStore
 		return s.CacheMultiStore(), nil
 	}
 
-	stores := make(map[types.StoreKey]types.CacheWrapper)
+	eg := errgroup.Group{}
+	eg.SetLimit(store.MaxWriteParallelism)
+
+	var lock sync.Mutex
+
+	cachedStores := make(map[types.StoreKey]types.KVStore, len(s.stores))
 	for k, v := range s.stores {
-		var cacheStore types.KVStore
-		switch v.GetStoreType() {
-		case types.StoreTypeIAVL:
-			store, err := v.(*compatiavl.Store).GetImmutable(version)
-			if err != nil {
-				return nil, err
+		key := k
+		ss := v
+
+		eg.Go(func() error {
+			var cacheStore types.KVStore
+
+			switch ss.GetStoreType() {
+			case types.StoreTypeIAVL:
+				store, err := ss.(*compatiavl.Store).GetImmutable(version)
+				if err != nil {
+					return err
+				}
+
+				cacheStore = store
+			default:
+				cacheStore = ss
 			}
 
-			cacheStore = store
-		default:
-			cacheStore = v
+			lock.Lock()
+			defer lock.Unlock()
+
+			cachedStores[key] = cacheStore
+
+			return nil
+		})
+	}
+
+	if err := eg.Wait(); err != nil {
+		return nil, err
+	}
+
+	stores := make(map[types.StoreKey]types.CacheWrapper)
+	for key, store := range cachedStores {
+		cacheStore := store
+
+		if s.ListeningEnabled(key) {
+			cacheStore = listenkv.NewStore(store, key, s.listeners[key])
 		}
 
-		if s.ListeningEnabled(k) {
-			cacheStore = listenkv.NewStore(cacheStore, k, s.listeners[k])
-		}
-
-		stores[k] = cacheStore
+		stores[key] = cacheStore
 	}
 
 	return cachemulti.NewStore(nil, stores, s.keysByName, s.traceWriter, s.getTracingContext()), nil
