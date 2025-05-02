@@ -8,6 +8,7 @@ import (
 
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	iavl_v2 "github.com/cosmos/iavl/v2"
 
 	store "github.com/SaharaLabsAI/sahara-store"
 	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
@@ -15,6 +16,12 @@ import (
 
 	rootmulti "github.com/SaharaLabsAI/sahara-store/compatv1/rootmulti"
 )
+
+func DefaultIavl2Options() *iavl_v2.TreeOptions {
+	opts := iavlv2.DefaultOptions()
+
+	return &opts
+}
 
 func SetupStoreIAVL2(
 	logger log.Logger,
@@ -24,9 +31,10 @@ func SetupStoreIAVL2(
 	storeKeyNames []string,
 	appDBBackend dbm.BackendType,
 	pruningOptions pruningtypes.PruningOptions,
+	iavlOptions *iavl_v2.TreeOptions,
 ) []func(*baseapp.BaseApp) {
 	baseAppOptions = append([]func(*baseapp.BaseApp){
-		setup(logger, db, homePath, storeKeyNames, appDBBackend, pruningOptions),
+		setup(logger, db, homePath, storeKeyNames, appDBBackend, pruningOptions, iavlOptions),
 	}, baseAppOptions...)
 
 	return baseAppOptions
@@ -39,7 +47,13 @@ func setup(
 	storeKeyNames []string,
 	appDBBackend dbm.BackendType,
 	pruningOptions pruningtypes.PruningOptions,
+	iavlOptions *iavl_v2.TreeOptions,
 ) func(*baseapp.BaseApp) {
+	iavlOpts := *iavlOptions
+	if iavlOptions == nil {
+		iavlOpts = iavlv2.DefaultOptions()
+	}
+
 	return func(bapp *baseapp.BaseApp) {
 		config := &root.Config{
 			Home:         homePath,
@@ -50,7 +64,7 @@ func setup(
 					pruningOptions.KeepRecent,
 					pruningOptions.Interval,
 				),
-				IavlV2Config: iavlv2.DefaultOptions(),
+				IavlV2Config: iavlOpts,
 			},
 		}
 

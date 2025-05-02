@@ -81,7 +81,6 @@ func (t *Tree) SetInitialVersion(version uint64) error {
 	if err := isHighBitSet(version); err != nil {
 		return err
 	}
-	t.tree.SetShouldCheckpoint()
 	return t.tree.SetInitialVersion(int64(version))
 }
 
@@ -190,8 +189,7 @@ func isHighBitSet(version uint64) error {
 
 func DefaultOptions() iavl.TreeOptions {
 	opts := iavl.DefaultTreeOptions()
-	opts.CheckpointInterval = 5
 	opts.HeightFilter = 1
-	opts.EvictionDepth = 18
+	opts.EvictionDepth = -1
 	return opts
 }

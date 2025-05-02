@@ -14,8 +14,9 @@ import (
 	"github.com/cosmos/iavl/v2/metrics"
 
 	commiavl "github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
-	"github.com/SaharaLabsAI/sahara-store/compatv1/kv"
 	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
+
+	"github.com/SaharaLabsAI/sahara-store/compatv1/kv"
 )
 
 var (
@@ -38,7 +39,7 @@ func newAlohaTree(t *testing.T) (*commiavl.Tree, types.CommitID, iavl_v2.TreeOpt
 	t.Helper()
 
 	treeOpts := iavl_v2.TreeOptions{
-		CheckpointInterval: 10, HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
+		HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
 	}
 	nopLog := coretesting.NewNopLogger()
 	dbOpts := iavl_v2.DefaultSqliteDbOptions(iavl_v2.SqliteDbOptions{
@@ -297,7 +298,7 @@ func TestIAVLIterator(t *testing.T) {
 
 func TestIAVLReverseIterator(t *testing.T) {
 	treeOpts := iavl_v2.TreeOptions{
-		CheckpointInterval: 10, HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
+		HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
 	}
 	nopLog := coretesting.NewNopLogger()
 	dbOpts := iavl_v2.DefaultSqliteDbOptions(iavl_v2.SqliteDbOptions{
@@ -339,7 +340,7 @@ func TestIAVLReverseIterator(t *testing.T) {
 
 func TestIAVLPrefixIterator(t *testing.T) {
 	treeOpts := iavl_v2.TreeOptions{
-		CheckpointInterval: 10, HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
+		HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
 	}
 	nopLog := coretesting.NewNopLogger()
 	dbOpts := iavl_v2.DefaultSqliteDbOptions(iavl_v2.SqliteDbOptions{
@@ -411,7 +412,7 @@ func TestIAVLPrefixIterator(t *testing.T) {
 
 func TestIAVLReversePrefixIterator(t *testing.T) {
 	treeOpts := iavl_v2.TreeOptions{
-		CheckpointInterval: 10, HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
+		HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
 	}
 	nopLog := coretesting.NewNopLogger()
 	dbOpts := iavl_v2.DefaultSqliteDbOptions(iavl_v2.SqliteDbOptions{
@@ -487,7 +488,7 @@ func nextVersion(iavl *Store) {
 
 func TestIAVLNoPrune(t *testing.T) {
 	treeOpts := iavl_v2.TreeOptions{
-		CheckpointInterval: 10, HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
+		HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
 	}
 	nopLog := coretesting.NewNopLogger()
 	dbOpts := iavl_v2.DefaultSqliteDbOptions(iavl_v2.SqliteDbOptions{
@@ -515,7 +516,7 @@ func TestIAVLNoPrune(t *testing.T) {
 
 func TestIAVLStoreQuery(t *testing.T) {
 	treeOpts := iavl_v2.TreeOptions{
-		CheckpointInterval: 10, HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
+		HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
 	}
 	nopLog := coretesting.NewNopLogger()
 	dbOpts := iavl_v2.DefaultSqliteDbOptions(iavl_v2.SqliteDbOptions{
@@ -639,7 +640,7 @@ func BenchmarkIAVLIteratorNext(b *testing.B) {
 	b.ReportAllocs()
 	treeSize := 1000
 	treeOpts := iavl_v2.TreeOptions{
-		CheckpointInterval: 10, HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
+		HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
 	}
 	nopLog := coretesting.NewNopLogger()
 	dbOpts := iavl_v2.DefaultSqliteDbOptions(iavl_v2.SqliteDbOptions{
@@ -684,7 +685,7 @@ func TestSetInitialVersion(t *testing.T) {
 			"works with a mutable tree",
 			func() *Store {
 				treeOpts := iavl_v2.TreeOptions{
-					CheckpointInterval: 10, HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
+					HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
 				}
 				nopLog := coretesting.NewNopLogger()
 				dbOpts := iavl_v2.DefaultSqliteDbOptions(iavl_v2.SqliteDbOptions{
@@ -704,7 +705,7 @@ func TestSetInitialVersion(t *testing.T) {
 			"throws error on immutable tree",
 			func() *Store {
 				treeOpts := iavl_v2.TreeOptions{
-					CheckpointInterval: 10, HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
+					HeightFilter: 1, StateStorage: true, EvictionDepth: 8, MetricsProxy: metrics.NewStructMetrics(),
 				}
 				nopLog := coretesting.NewNopLogger()
 				dbOpts := iavl_v2.DefaultSqliteDbOptions(iavl_v2.SqliteDbOptions{
