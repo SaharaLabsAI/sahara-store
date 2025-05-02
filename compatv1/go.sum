@@ -36,8 +36,8 @@ github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/DataDog/zstd v1.5.5 h1:oWf5W7GtOLgp6bciQYDmhHHjdhYkALu6S/5Ni9ZgSvQ=
 github.com/DataDog/zstd v1.5.5/go.mod h1:g4AWEaM3yOg3HYfnJ3YIawPnVdXJh9QME85blwSAmyw=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
-github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.5 h1:RgT/st8Z6y6SJ1wAcrYuRFW33tJCQmLdL1qPMrGLzuo=
-github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.5/go.mod h1:dCO8/bugo2wkk88AKXRA0O4KkGwD37AjOMJzT6zrqA8=
+github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.7 h1:1I8sVViRjjsL1ElDX3CuT8erX6Ewioqrw/qG8M99KOI=
+github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.7/go.mod h1:274ZvwTGwCLz1RabYrrWM+KrJ7tTQLkP6etlL0rtlFQ=
 github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250421065128-2ca4f0b9147e h1:HLDtT6XnFRZUc3S/24mV9no7Kf1m4etFkdXeMQranzA=
 github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250421065128-2ca4f0b9147e/go.mod h1:ToBlV+xPf8QZ8DRmicoOY+tBvGdNUTtBT20T4LfNgCU=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
@@ -77,8 +77,6 @@ github.com/btcsuite/btcd/btcutil v1.1.6 h1:zFL2+c3Lb9gEgqKNzowKUPQNb8jV7v5Oaodi/
 github.com/btcsuite/btcd/btcutil v1.1.6/go.mod h1:9dFymx8HpuLqBnsPELrImQeTQfKBQqzqGbbV3jK55aE=
 github.com/bufbuild/protocompile v0.6.0 h1:Uu7WiSQ6Yj9DbkdnOe7U4mNKp58y9WDMKDn28/ZlunY=
 github.com/bufbuild/protocompile v0.6.0/go.mod h1:YNP35qEYoYGme7QMtz5SBCoN4kL4g12jTtjuzRNdjpE=
-github.com/bvinc/go-sqlite-lite v0.6.1 h1:JU8Rz5YAOZQiU3WEulKF084wfXpytRiqD2IaW2QjPz4=
-github.com/bvinc/go-sqlite-lite v0.6.1/go.mod h1:2GiE60NUdb0aNhDdY+LXgrqAVDpi2Ijc6dB6ZMp9x6s=
 github.com/bytedance/sonic v1.12.8 h1:4xYRVRlXIgvSZ4e8iVTlMF5szgpXd4AfvuWgA8I8lgs=
 github.com/bytedance/sonic v1.12.8/go.mod h1:uVvFidNmlt9+wa31S1urfwwthTWteBgG0hWuoKAXTx8=
 github.com/bytedance/sonic/loader v0.1.1/go.mod h1:ncP89zfokxS5LZrJxl5z0UJcsk4M4yY2JpfqGeCtNLU=
@@ -192,6 +190,8 @@ github.com/dvsekhvalnov/jose2go v1.6.0/go.mod h1:QsHjhyTlD/lAVqn/NSbVZmSCGeDehTB
 github.com/eapache/go-resiliency v1.1.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5mFgVsvEsIPBvNs=
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
+github.com/eatonphil/gosqlite v0.10.1-0.20250409163211-9c47979bc5b1 h1:8l7+PsHecBS/RF1csg0PP3x6/yMJR8uOHmgYvQtWNgo=
+github.com/eatonphil/gosqlite v0.10.1-0.20250409163211-9c47979bc5b1/go.mod h1:BQrvW3lTI1o91VIArLBHqbRX8TuWeWmDoFQOGLnJ87o=
 github.com/edsrzf/mmap-go v1.0.0/go.mod h1:YO35OhQPt3KJa3ryjFM5Bs14WD66h8eGKpfaBNrHW5M=
 github.com/emicklei/dot v1.8.0 h1:HnD60yAKFAevNeT+TPYr9pb8VB9bqdeSo0nzwIW6IOI=
 github.com/emicklei/dot v1.8.0/go.mod h1:DeV7GvQtIw4h2u73RKBkkFdvVAz0D9fzeJrgPW6gy/s=
