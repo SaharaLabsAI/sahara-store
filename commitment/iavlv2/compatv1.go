@@ -1,6 +1,8 @@
 package iavlv2
 
 import (
+	"time"
+
 	"github.com/SaharaLabsAI/sahara-store/commitment"
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 )
@@ -58,4 +60,15 @@ func (t *Tree) VersionExists(version uint64) bool {
 	}
 
 	return exists
+}
+
+func (t *Tree) Warm() error {
+	t.log.Info("warm tree", "path", t.path)
+
+	start := time.Now()
+	defer func() {
+		t.log.Info("warm tree finish", "path", t.path, "duration", time.Since(start).Milliseconds())
+	}()
+
+	return t.tree.Warm()
 }

@@ -412,3 +412,7 @@ func (s *Store) Export(version int64) (commstore.Exporter, error) {
 func (s *Store) PurgeCache() {
 	s.cache.Purge()
 }
+
+func (s *Store) Warm() error {
+	return s.tree.Warm()
+}
