@@ -532,24 +532,7 @@ func (s *Store) RollbackToVersion(target int64) error {
 		return fmt.Errorf("invalid rollback height target: %d", target)
 	}
 
-	for key, store := range s.stores {
-		if store.GetStoreType() == types.StoreTypeIAVL {
-			// If the store is wrapped with an inter-block cache, we must first unwrap
-			// it to get the underlying IAVL store.
-			store = s.GetCommitKVStore(key)
-			err := store.(*compatiavl.Store).LoadVersionForOverwriting(target)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	ci, err := s.root.GetStateCommitment().GetCommitInfo(uint64(target))
-	if err != nil {
-		return err
-	}
-
-	return s.root.(*root.Store).FlushCommitInfo(ci)
+	return s.root.LoadVersionForOverwriting(uint64(target))
 }
 
 // SetIAVLCacheSize implements types.CommitMultiStore.
