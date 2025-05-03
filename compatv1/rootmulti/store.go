@@ -544,12 +544,12 @@ func (s *Store) RollbackToVersion(target int64) error {
 		}
 	}
 
-	_, err := s.root.Commit(&coretypes.Changeset{
-		Version: uint64(target),
-		Changes: make([]coretypes.StateChanges, 0),
-	})
+	ci, err := s.root.GetStateCommitment().GetCommitInfo(uint64(target))
+	if err != nil {
+		return err
+	}
 
-	return err
+	return s.root.(*root.Store).FlushCommitInfo(ci)
 }
 
 // SetIAVLCacheSize implements types.CommitMultiStore.
