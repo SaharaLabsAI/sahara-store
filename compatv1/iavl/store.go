@@ -155,11 +155,11 @@ func (s *Store) CacheWrapWithTrace(w io.Writer, tc types.TraceContext) types.Cac
 func (s *Store) Delete(key []byte) {
 	defer s.metrics.MeasureSince("store", "iavl", "delete")
 
-	s.cache.Remove(string(key))
-
 	if err := s.tree.Remove(key); err != nil {
 		panic(err)
 	}
+
+	s.cache.Remove(string(key))
 }
 
 // Get implements types.KVStore.
@@ -189,6 +189,11 @@ func (s *Store) GetStoreType() types.StoreType {
 // Has implements types.KVStore.
 func (s *Store) Has(key []byte) bool {
 	defer s.metrics.MeasureSince("store", "iavl", "has")
+
+	_, ok := s.cache.Get(string(key))
+	if ok {
+		return true
+	}
 
 	has, err := s.tree.HasDirty(key)
 	if err != nil {
@@ -224,11 +229,11 @@ func (s *Store) Set(key []byte, value []byte) {
 		panic("set nil value")
 	}
 
-	s.cache.Add(string(key), value)
-
 	if err := s.tree.Set(key, value); err != nil {
 		panic(err)
 	}
+
+	s.cache.Add(string(key), value)
 }
 
 func (s *Store) GetImmutable(version int64) (*Store, error) {
