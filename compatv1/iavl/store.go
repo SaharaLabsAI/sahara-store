@@ -32,7 +32,8 @@ var (
 	_ types.Queryable     = (*Store)(nil)
 )
 
-const lruCacheSize = 500000
+const lruCacheSize = 600000
+const warnLeavesSize = 300000
 
 type Store struct {
 	tree    commstore.CompatV1Tree
@@ -414,5 +415,19 @@ func (s *Store) PurgeCache() {
 }
 
 func (s *Store) Warm() error {
-	return s.tree.Warm()
+	version := s.tree.Version()
+	cnt := warnLeavesSize
+
+	iter, err := s.tree.IteratorLeavesAt(version)
+	if err != nil {
+		return nil
+	}
+	defer iter.Close()
+
+	for ; iter.Valid() && cnt > 0; iter.Next() {
+		cnt--
+		s.cache.Add(string(iter.Key()), iter.Value())
+	}
+
+	return nil
 }

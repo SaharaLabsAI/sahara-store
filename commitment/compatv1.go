@@ -17,7 +17,7 @@ type CompatV1Tree interface {
 	GetImmutable(version uint64) (CompatV1Tree, error)
 	SaveVersion() ([]byte, int64, error)
 	VersionExists(uint64) bool
-	Warm() error
+	IteratorLeavesAt(version uint64) (corestore.Iterator, error)
 }
 
 func (c *CommitStore) GetTree(storeKey string) (CompatV1Tree, error) {

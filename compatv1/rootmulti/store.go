@@ -307,7 +307,29 @@ func (s *Store) LoadLatestVersion() error {
 		return err
 	}
 
-	return s.LoadVersionAndUpgrade(int64(latestVersion), nil)
+	err = s.LoadVersionAndUpgrade(int64(latestVersion), nil)
+	if err != nil {
+		return err
+	}
+
+	eg := errgroup.Group{}
+	eg.SetLimit(store.MaxWriteParallelism)
+
+	for k, v := range s.stores {
+		ss := v
+
+		eg.Go(func() error {
+			s.logger.Info("warm store", "store", k.Name())
+
+			if ss.GetStoreType() != types.StoreTypeIAVL {
+				return nil
+			}
+
+			return ss.(*compatiavl.Store).Warm()
+		})
+	}
+
+	return eg.Wait()
 }
 
 // LoadLatestVersionAndUpgrade implements types.CommitMultiStore.
