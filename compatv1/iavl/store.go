@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 
+	lru "github.com/hashicorp/golang-lru/v2"
+
 	"github.com/cometbft/cometbft/proto/tendermint/crypto"
 
 	"cosmossdk.io/store/cachekv"
@@ -30,8 +32,11 @@ var (
 	_ types.Queryable     = (*Store)(nil)
 )
 
+const lruCacheSize = 500000
+
 type Store struct {
 	tree    commstore.CompatV1Tree
+	cache   *lru.Cache[string, any]
 	metrics metrics.StoreMetrics
 }
 
@@ -46,8 +51,14 @@ func LoadStore(root store.RootStore, storeKey types.StoreKey, storeMetrics metri
 		panic(err)
 	}
 
+	cache, err := lru.New[string, any](lruCacheSize)
+	if err != nil {
+		panic(err)
+	}
+
 	return &Store{
 		tree:    tree,
+		cache:   cache,
 		metrics: storeMetrics,
 	}
 }
@@ -66,15 +77,27 @@ func LoadStoreWithOpts(treeOpts iavl_v2.TreeOptions, dbOpts iavl_v2.SqliteDbOpti
 		return nil, err
 	}
 
+	cache, err := lru.New[string, any](lruCacheSize)
+	if err != nil {
+		panic(err)
+	}
+
 	return &Store{
 		tree:    tree,
+		cache:   cache,
 		metrics: storeMetrics,
 	}, nil
 }
 
 func UnsafeNewStore(tree commstore.CompatV1Tree) *Store {
+	cache, err := lru.New[string, any](lruCacheSize)
+	if err != nil {
+		panic(err)
+	}
+
 	return &Store{
 		tree:    tree,
+		cache:   cache,
 		metrics: metrics.NewNoOpMetrics(),
 	}
 }
@@ -131,6 +154,8 @@ func (s *Store) CacheWrapWithTrace(w io.Writer, tc types.TraceContext) types.Cac
 func (s *Store) Delete(key []byte) {
 	defer s.metrics.MeasureSince("store", "iavl", "delete")
 
+	s.cache.Remove(string(key))
+
 	if err := s.tree.Remove(key); err != nil {
 		panic(err)
 	}
@@ -140,10 +165,17 @@ func (s *Store) Delete(key []byte) {
 func (s *Store) Get(key []byte) []byte {
 	defer s.metrics.MeasureSince("store", "iavl", "get")
 
+	valueI, ok := s.cache.Get(string(key))
+	if ok {
+		return valueI.([]byte)
+	}
+
 	val, err := s.tree.GetDirty(key)
 	if err != nil {
 		panic(err)
 	}
+
+	s.cache.Add(string(key), val)
 
 	return val
 }
@@ -187,9 +219,11 @@ func (s *Store) ReverseIterator(start []byte, end []byte) types.Iterator {
 
 // Set implements types.KVStore.
 func (s *Store) Set(key []byte, value []byte) {
-	if key == nil || len(key) == 0 {
+	if len(key) == 0 {
 		panic("set nil value")
 	}
+
+	s.cache.Add(string(key), value)
 
 	if err := s.tree.Set(key, value); err != nil {
 		panic(err)
@@ -202,8 +236,14 @@ func (s *Store) GetImmutable(version int64) (*Store, error) {
 		return nil, err
 	}
 
+	cache, err := lru.New[string, any](100)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Store{
 		tree:    imTree,
+		cache:   cache,
 		metrics: s.metrics,
 	}, nil
 }
@@ -361,9 +401,14 @@ func (s *Store) Import(version int64) (commstore.Importer, error) {
 }
 
 func (s *Store) LoadVersionForOverwriting(version int64) error {
+	s.cache.Purge()
 	return s.tree.LoadVersionForOverwriting(uint64(version))
 }
 
 func (s *Store) Export(version int64) (commstore.Exporter, error) {
 	return s.tree.Export(uint64(version))
+}
+
+func (s *Store) PurgeCache() {
+	s.cache.Purge()
 }
