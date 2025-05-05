@@ -225,9 +225,8 @@ func (s *Store) ReverseIterator(start []byte, end []byte) types.Iterator {
 
 // Set implements types.KVStore.
 func (s *Store) Set(key []byte, value []byte) {
-	if len(key) == 0 {
-		panic("set nil value")
-	}
+	types.AssertValidKey(key)
+	types.AssertValidValue(value)
 
 	if err := s.tree.Set(key, value); err != nil {
 		panic(err)
