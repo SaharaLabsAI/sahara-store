@@ -69,6 +69,10 @@ func (t *Tree) LoadVersion(version uint64) error {
 }
 
 func (t *Tree) LoadVersionForOverwriting(version uint64) error {
+	if err := t.tree.Revert(int64(version)); err != nil {
+		return err
+	}
+
 	return t.LoadVersion(version)
 }
 
