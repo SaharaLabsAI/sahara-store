@@ -709,18 +709,38 @@ func (s *Store) TracingEnabled() bool {
 func (s *Store) WorkingHash() []byte {
 	storeInfos := make([]types.StoreInfo, 0, len(s.stores))
 
+	eg := errgroup.Group{}
+	eg.SetLimit(store.MaxWriteParallelism)
+
+	var lock sync.Mutex
+
 	for key, store := range s.stores {
 		if store.GetStoreType() != types.StoreTypeIAVL {
 			continue
 		}
 
-		si := types.StoreInfo{
-			Name: key.Name(),
-			CommitId: types.CommitID{
-				Hash: store.WorkingHash(),
-			},
-		}
-		storeInfos = append(storeInfos, si)
+		k := key
+		ss := store
+
+		eg.Go(func() error {
+			si := types.StoreInfo{
+				Name: k.Name(),
+				CommitId: types.CommitID{
+					Hash: ss.WorkingHash(),
+				},
+			}
+
+			lock.Lock()
+			defer lock.Unlock()
+
+			storeInfos = append(storeInfos, si)
+
+			return nil
+		})
+	}
+
+	if err := eg.Wait(); err != nil {
+		panic(fmt.Sprintf("unexpected working hash failed %s", err.Error()))
 	}
 
 	sort.SliceStable(storeInfos, func(i, j int) bool {
