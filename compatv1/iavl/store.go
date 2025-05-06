@@ -3,6 +3,7 @@ package iavl
 import (
 	"fmt"
 	"io"
+	"sync"
 
 	lru "github.com/hashicorp/golang-lru/v2"
 
@@ -36,8 +37,10 @@ const lruCacheSize = 600000
 const warnLeavesSize = 180000
 
 type Store struct {
-	tree    commstore.CompatV1Tree
-	cache   *lru.Cache[string, any]
+	tree  commstore.CompatV1Tree
+	cache *lru.Cache[string, any]
+
+	lock    sync.RWMutex
 	metrics metrics.StoreMetrics
 }
 
@@ -155,6 +158,9 @@ func (s *Store) CacheWrapWithTrace(w io.Writer, tc types.TraceContext) types.Cac
 func (s *Store) Delete(key []byte) {
 	defer s.metrics.MeasureSince("store", "iavl", "delete")
 
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	if err := s.tree.Remove(key); err != nil {
 		panic(err)
 	}
@@ -165,6 +171,9 @@ func (s *Store) Delete(key []byte) {
 // Get implements types.KVStore.
 func (s *Store) Get(key []byte) []byte {
 	defer s.metrics.MeasureSince("store", "iavl", "get")
+
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 
 	valueI, ok := s.cache.Get(string(key))
 	if ok {
@@ -189,6 +198,9 @@ func (s *Store) GetStoreType() types.StoreType {
 // Has implements types.KVStore.
 func (s *Store) Has(key []byte) bool {
 	defer s.metrics.MeasureSince("store", "iavl", "has")
+
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 
 	_, ok := s.cache.Get(string(key))
 	if ok {
@@ -227,6 +239,9 @@ func (s *Store) ReverseIterator(start []byte, end []byte) types.Iterator {
 func (s *Store) Set(key []byte, value []byte) {
 	types.AssertValidKey(key)
 	types.AssertValidValue(value)
+
+	s.lock.Lock()
+	defer s.lock.Unlock()
 
 	if err := s.tree.Set(key, value); err != nil {
 		panic(err)
@@ -418,6 +433,7 @@ func (s *Store) PurgeCache() {
 	s.cache.Purge()
 }
 
+// FIXME: should exclude deleted leaves
 func (s *Store) Warm() error {
 	version := s.tree.Version()
 	cnt := warnLeavesSize
