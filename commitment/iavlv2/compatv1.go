@@ -61,7 +61,5 @@ func (t *Tree) VersionExists(version uint64) bool {
 }
 
 func (t *Tree) IteratorLeavesAt(version uint64) (corestore.Iterator, error) {
-	t.log.Info("iterator leaves ", "path", t.path)
-
 	return t.tree.IteratorLeavesAt(int64(version))
 }

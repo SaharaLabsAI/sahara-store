@@ -34,7 +34,7 @@ var (
 )
 
 const lruCacheSize = 600000
-const warnLeavesSize = 180000
+const warnLeavesSize = 300000
 
 type Store struct {
 	tree  commstore.CompatV1Tree
@@ -433,7 +433,6 @@ func (s *Store) PurgeCache() {
 	s.cache.Purge()
 }
 
-// FIXME: should exclude deleted leaves
 func (s *Store) Warm() error {
 	version := s.tree.Version()
 	cnt := warnLeavesSize
