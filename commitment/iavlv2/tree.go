@@ -3,8 +3,9 @@ package iavlv2
 import (
 	"fmt"
 
-	"github.com/cosmos/iavl/v2"
 	ics23 "github.com/cosmos/ics23/go"
+
+	"github.com/cosmos/iavl/v2"
 
 	store "github.com/SaharaLabsAI/sahara-store"
 	"github.com/SaharaLabsAI/sahara-store/commitment"
@@ -194,6 +195,6 @@ func isHighBitSet(version uint64) error {
 func DefaultOptions() iavl.TreeOptions {
 	opts := iavl.DefaultTreeOptions()
 	opts.HeightFilter = 1
-	opts.EvictionDepth = 27
+	opts.EvictionDepth = 29
 	return opts
 }
