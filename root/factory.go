@@ -22,12 +22,12 @@ type (
 
 const (
 	SCTypeIavl   SCType = "iavl"
-	SCTypeIavlV2 SCType = "iavl-v2"
+	SCTypeIavlV2 SCType = "iavl2"
 )
 
 // Options are the options for creating a root store.
 type Options struct {
-	SCType          SCType               `mapstructure:"sc-type" toml:"sc-type" comment:"State commitment database type. Currently we support: \"iavl\" and \"iavl-v2\""`
+	SCType          SCType               `mapstructure:"sc-type" toml:"sc-type" comment:"State commitment database type. Currently we support: \"iavl\" and \"iavl2\""`
 	SCPruningOption *store.PruningOption `mapstructure:"sc-pruning-option" toml:"sc-pruning-option" comment:"Pruning options for state commitment"`
 	IavlV2Config    iavl_v2.TreeOptions
 }
@@ -100,7 +100,7 @@ func CreateRootStore(opts *FactoryOptions) (store.RootStore, error) {
 			case SCTypeIavlV2:
 				metrics := metrics.NoOpMetrics{}
 				opts.Options.IavlV2Config.MetricsProxy = metrics
-				dir := fmt.Sprintf("%s/data/iavl-v2/%s", opts.RootDir, key)
+				dir := fmt.Sprintf("%s/data/iavl2/%s", opts.RootDir, key)
 				return iavlv2.NewTree(
 					opts.Options.IavlV2Config, iavl_v2.SqliteDbOptions{Path: dir, Metrics: metrics}, opts.Logger)
 			default:
