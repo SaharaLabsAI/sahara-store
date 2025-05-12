@@ -18,6 +18,8 @@ cosmossdk.io/math v1.4.0 h1:XbgExXFnXmF/CccPPEto40gOO7FpWu9yWNAZPN3nkNQ=
 cosmossdk.io/math v1.4.0/go.mod h1:O5PkD4apz2jZs4zqFdTr16e1dcaQCc5z6lkEnrrppuk=
 cosmossdk.io/schema v1.0.0 h1:/diH4XJjpV1JQwuIozwr+A4uFuuwanFdnw2kKeiXwwQ=
 cosmossdk.io/schema v1.0.0/go.mod h1:RDAhxIeNB4bYqAlF4NBJwRrgtnciMcyyg0DOKnhNZQQ=
+cosmossdk.io/schema v1.1.0 h1:mmpuz3dzouCoyjjcMcA/xHBEmMChN+EHh8EHxHRHhzE=
+cosmossdk.io/schema v1.1.0/go.mod h1:Gb7pqO+tpR+jLW5qDcNOSv0KtppYs7881kfzakguhhI=
 cosmossdk.io/store v1.1.1 h1:NA3PioJtWDVU7cHHeyvdva5J/ggyLDkyH0hGHl2804Y=
 cosmossdk.io/store v1.1.1/go.mod h1:8DwVTz83/2PSI366FERGbWSH7hL6sB7HbYp8bqksNwM=
 cosmossdk.io/x/tx v0.13.7 h1:8WSk6B/OHJLYjiZeMKhq7DK7lHDMyK0UfDbBMxVmeOI=
@@ -40,6 +42,8 @@ github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.14 h1:jszVeoNNT4ZjMFdDY7YkhrmgOX2
 github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.14/go.mod h1:274ZvwTGwCLz1RabYrrWM+KrJ7tTQLkP6etlL0rtlFQ=
 github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250421065128-2ca4f0b9147e h1:HLDtT6XnFRZUc3S/24mV9no7Kf1m4etFkdXeMQranzA=
 github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250421065128-2ca4f0b9147e/go.mod h1:ToBlV+xPf8QZ8DRmicoOY+tBvGdNUTtBT20T4LfNgCU=
+github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250510023746-bdd64c4ad0c9 h1:ufeztnpd8AoD9CWRgvDbNhWrfYUPURS4FczfTQ5Z3Cc=
+github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250510023746-bdd64c4ad0c9/go.mod h1:ToBlV+xPf8QZ8DRmicoOY+tBvGdNUTtBT20T4LfNgCU=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
 github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrdtl/UvroE=

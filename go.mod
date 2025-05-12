@@ -13,8 +13,8 @@ replace (
 require (
 	cosmossdk.io/errors/v2 v2.0.0
 	cosmossdk.io/log v1.5.0
-	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250421065128-2ca4f0b9147e
-	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250421065128-2ca4f0b9147e
+	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250510023746-bdd64c4ad0c9
+	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250510023746-bdd64c4ad0c9
 	github.com/cockroachdb/pebble v1.1.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/gogoproto v1.7.0
@@ -31,7 +31,7 @@ require (
 )
 
 require (
-	cosmossdk.io/schema v1.0.0 // indirect
+	cosmossdk.io/schema v1.1.0 // indirect
 	github.com/DataDog/zstd v1.5.5 // indirect
 	github.com/aybabtme/uniplot v0.0.0-20151203143629-039c559e5e7e // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
