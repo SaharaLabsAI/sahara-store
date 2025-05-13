@@ -65,6 +65,20 @@ func setup(
 					pruningOptions.Interval,
 				),
 				IavlV2Config: iavlOpts,
+				StoreDBOptions: map[string]iavl_v2.SqliteDbOptions{
+					"acc": {
+						MmapSize:  0,                // ensure mmap is disable completely
+						CacheSize: -3 * 1024 * 1024, // 3G
+					},
+					"bank": {
+						MmapSize:  0,                // ensure mmap is disable completely
+						CacheSize: -4 * 1024 * 1024, // 4G
+					},
+					"evm": {
+						MmapSize:  0,                // ensure mmap is disable completely
+						CacheSize: -3 * 1024 * 1024, // 3G
+					},
+				},
 			},
 		}
 
