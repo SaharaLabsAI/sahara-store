@@ -324,10 +324,10 @@ func (s *Store) LoadLatestVersion() error {
 		eg.Go(func() error {
 			start := time.Now()
 			s.logger.Info(fmt.Sprintf("preload store %s", key.Name()))
-			fmt.Printf("preload store %s", key.Name())
+			fmt.Printf("preload store %s\n", key.Name())
 			defer func() {
 				s.logger.Info(fmt.Sprintf("store %s preldoaded, duration %d", key.Name(), time.Since(start).Milliseconds()))
-				fmt.Printf("store %s preldoaded, duration %d", key.Name(), time.Since(start).Milliseconds())
+				fmt.Printf("store %s preldoaded, duration %d\n", key.Name(), time.Since(start).Milliseconds())
 			}()
 
 			if err := store.(*compatiavl.Store).Warm(); err != nil {
