@@ -3,8 +3,10 @@ package root
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	iavl_v2 "github.com/cosmos/iavl/v2"
+	"golang.org/x/sync/errgroup"
 
 	store "github.com/SaharaLabsAI/sahara-store"
 	"github.com/SaharaLabsAI/sahara-store/commitment"
@@ -118,14 +120,32 @@ func CreateRootStore(opts *FactoryOptions) (store.RootStore, error) {
 		}
 	}
 
+	eg := new(errgroup.Group)
+	eg.SetLimit(store.MaxWriteParallelism)
+
+	var lock sync.Mutex
+
 	trees := make(map[string]commitment.CompatV1Tree, len(opts.StoreKeys))
 	for _, key := range opts.StoreKeys {
-		tree, err := newTreeFn(key)
-		if err != nil {
-			return nil, err
-		}
-		trees[key] = tree
+		eg.Go(func() error {
+			tree, err := newTreeFn(key)
+			if err != nil {
+				return err
+			}
+
+			lock.Lock()
+			defer lock.Unlock()
+
+			trees[key] = tree
+
+			return nil
+		})
 	}
+
+	if err := eg.Wait(); err != nil {
+		return nil, err
+	}
+
 	oldTrees := make(map[string]commitment.CompatV1Tree, len(opts.StoreKeys))
 	for _, key := range removedStoreKeys {
 		tree, err := newTreeFn(string(key))
