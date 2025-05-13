@@ -32,9 +32,10 @@ func SetupStoreIAVL2(
 	appDBBackend dbm.BackendType,
 	pruningOptions pruningtypes.PruningOptions,
 	iavlOptions *iavl_v2.TreeOptions,
+	optimizeOnStart bool,
 ) []func(*baseapp.BaseApp) {
 	baseAppOptions = append([]func(*baseapp.BaseApp){
-		setup(logger, db, homePath, storeKeyNames, appDBBackend, pruningOptions, iavlOptions),
+		setup(logger, db, homePath, storeKeyNames, appDBBackend, pruningOptions, iavlOptions, optimizeOnStart),
 	}, baseAppOptions...)
 
 	return baseAppOptions
@@ -48,6 +49,7 @@ func setup(
 	appDBBackend dbm.BackendType,
 	pruningOptions pruningtypes.PruningOptions,
 	iavlOptions *iavl_v2.TreeOptions,
+	optimizeOnStart bool,
 ) func(*baseapp.BaseApp) {
 	iavlOpts := *iavlOptions
 	if iavlOptions == nil {
@@ -79,6 +81,7 @@ func setup(
 						CacheSize: -4 * 1024 * 1024, // 4G
 					},
 				},
+				OptimizeDBOnStart: optimizeOnStart,
 			},
 		}
 
