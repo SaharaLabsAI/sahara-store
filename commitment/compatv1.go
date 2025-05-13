@@ -9,8 +9,10 @@ import (
 
 type CompatV1Tree interface {
 	Tree
+	Path() string
 	SetDirty(key, value []byte) (bool, error)
 	GetDirty(key []byte) ([]byte, error)
+	GetFromRoot(key []byte) ([]byte, error)
 	HasDirty(key []byte) (bool, error)
 	IteratorDirty(start, end []byte, ascending bool) (corestore.Iterator, error)
 	WorkingHash() []byte

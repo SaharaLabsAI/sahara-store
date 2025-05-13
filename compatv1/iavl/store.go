@@ -445,6 +445,13 @@ func (s *Store) Warm() error {
 
 	for ; iter.Valid() && cnt > 0; iter.Next() {
 		cnt--
+
+		// Also warm branches
+		_, err := s.tree.GetFromRoot(iter.Key())
+		if err != nil {
+			return err
+		}
+
 		s.cache.Add(string(iter.Key()), iter.Value())
 	}
 

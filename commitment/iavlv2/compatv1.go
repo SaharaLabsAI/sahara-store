@@ -17,6 +17,14 @@ func (t *Tree) GetDirty(key []byte) ([]byte, error) {
 	return t.tree.Get(key)
 }
 
+func (t *Tree) GetFromRoot(key []byte) ([]byte, error) {
+	return t.tree.GetFromRoot(key)
+}
+
+func (t *Tree) Path() string {
+	return t.tree.Path()
+}
+
 func (t *Tree) HasDirty(key []byte) (bool, error) {
 	return t.tree.Has(key)
 }
