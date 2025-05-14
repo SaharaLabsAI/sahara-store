@@ -71,6 +71,10 @@ func setup(
 						MmapSize:  0,                // ensure mmap is disable completely
 						CacheSize: -5 * 1024 * 1024, // 5G
 					},
+					"distribution": {
+						MmapSize:  0,                // ensure mmap is disable completely
+						CacheSize: -1 * 1024 * 1024, // 1G
+					},
 					"evm": {
 						MmapSize:  0,                // ensure mmap is disable completely
 						CacheSize: -4 * 1024 * 1024, // 4G
