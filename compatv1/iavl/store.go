@@ -34,7 +34,7 @@ var (
 )
 
 const lruCacheSize = 300000
-const warnLeavesSize = lruCacheSize
+const warnLeavesSize = 100_000
 
 type Store struct {
 	tree  commstore.CompatV1Tree
