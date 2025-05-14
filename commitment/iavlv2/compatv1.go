@@ -68,6 +68,6 @@ func (t *Tree) VersionExists(version uint64) bool {
 	return exists
 }
 
-func (t *Tree) IteratorLeavesAt(version uint64) (corestore.Iterator, error) {
-	return t.tree.IteratorLeavesAt(int64(version))
+func (t *Tree) RecentUpdatedLeaves(version uint64, limit int) (corestore.Iterator, error) {
+	return t.tree.IteratorVersionDescLeaves(int64(version), limit)
 }

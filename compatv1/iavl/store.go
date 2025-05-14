@@ -435,17 +435,14 @@ func (s *Store) PurgeCache() {
 
 func (s *Store) Warm() error {
 	version := s.tree.Version()
-	cnt := warnLeavesSize
 
-	iter, err := s.tree.IteratorLeavesAt(version)
+	iter, err := s.tree.RecentUpdatedLeaves(version, warnLeavesSize)
 	if err != nil {
 		return nil
 	}
 	defer iter.Close()
 
-	for ; iter.Valid() && cnt > 0; iter.Next() {
-		cnt--
-
+	for ; iter.Valid(); iter.Next() {
 		// Also warm branches
 		_, err := s.tree.GetFromRoot(iter.Key())
 		if err != nil {
