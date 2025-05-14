@@ -326,6 +326,7 @@ func (s *Store) LoadLatestVersion() error {
 	eg := errgroup.Group{}
 	eg.SetLimit(store.MaxWriteParallelism)
 
+	s.logger.Warn("preload store kvs")
 	for key, store := range s.stores {
 		if store.GetStoreType() != types.StoreTypeIAVL {
 			continue
@@ -333,7 +334,6 @@ func (s *Store) LoadLatestVersion() error {
 
 		eg.Go(func() error {
 			start := time.Now()
-			s.logger.Warn(fmt.Sprintf("preload store %s", key.Name()))
 			defer func() {
 				s.logger.Warn(fmt.Sprintf("store %s preldoaded, duration %d", key.Name(), time.Since(start).Milliseconds()))
 			}()

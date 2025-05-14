@@ -24,14 +24,14 @@ func DefaultIavl2Options() *iavl_v2.TreeOptions {
 }
 
 type SetupIAVL2Context struct {
-	logger           log.Logger
-	homePath         string
-	db               dbm.DB
-	appDBBackend     dbm.BackendType
-	pruningOptions   pruningtypes.PruningOptions
-	iavlOptions      *iavl_v2.TreeOptions
-	optimizeOnStart  bool
-	warmCacheOnStart bool
+	Logger            log.Logger
+	HomePath          string
+	Db                dbm.DB
+	AppDBBackend      dbm.BackendType
+	PruningOptions    pruningtypes.PruningOptions
+	IavlOptions       *iavl_v2.TreeOptions
+	OptimizeDBOnStart bool
+	WarmCacheOnStart  bool
 }
 
 func SetupStoreIAVL2(
@@ -46,20 +46,20 @@ func setup(
 	ctx SetupIAVL2Context,
 	storeKeyNames []string,
 ) func(*baseapp.BaseApp) {
-	iavlOpts := *ctx.iavlOptions
-	if ctx.iavlOptions == nil {
+	iavlOpts := *ctx.IavlOptions
+	if ctx.IavlOptions == nil {
 		iavlOpts = iavlv2.DefaultOptions()
 	}
 
 	return func(bapp *baseapp.BaseApp) {
 		config := &root.Config{
-			Home:         ctx.homePath,
-			AppDBBackend: string(ctx.appDBBackend),
+			Home:         ctx.HomePath,
+			AppDBBackend: string(ctx.AppDBBackend),
 			Options: root.Options{
 				SCType: root.SCTypeIavlV2,
 				SCPruningOption: store.NewPruningOptionWithCustom(
-					ctx.pruningOptions.KeepRecent,
-					ctx.pruningOptions.Interval,
+					ctx.PruningOptions.KeepRecent,
+					ctx.PruningOptions.Interval,
 				),
 				IavlV2Config: iavlOpts,
 				StoreDBOptions: map[string]iavl_v2.SqliteDbOptions{
@@ -76,7 +76,7 @@ func setup(
 						CacheSize: -4 * 1024 * 1024, // 4G
 					},
 				},
-				OptimizeDBOnStart: ctx.optimizeOnStart,
+				OptimizeDBOnStart: ctx.OptimizeDBOnStart,
 			},
 		}
 
@@ -85,13 +85,13 @@ func setup(
 			builder.RegisterKey(key)
 		}
 
-		store, err := builder.BuildWithDB(ctx.logger, ctx.db, config)
+		store, err := builder.BuildWithDB(ctx.Logger, ctx.Db, config)
 		if err != nil {
 			panic(fmt.Errorf("setup store iavl v2 %s", err))
 		}
 
-		cms := rootmulti.NewStore(ctx.logger, store)
-		if ctx.warmCacheOnStart {
+		cms := rootmulti.NewStore(ctx.Logger, store)
+		if ctx.WarmCacheOnStart {
 			cms.SetWarmCacheOnStart()
 		}
 
