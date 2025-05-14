@@ -34,6 +34,7 @@ type Options struct {
 	IavlV2Config      iavl_v2.TreeOptions
 	StoreDBOptions    map[string]iavl_v2.SqliteDbOptions
 	OptimizeDBOnStart bool
+	WarmCacheOnStart  bool
 }
 
 // FactoryOptions are the options for creating a root store.
@@ -55,6 +56,7 @@ func DefaultStoreOptions() Options {
 			Interval:   100,
 		},
 		OptimizeDBOnStart: false,
+		WarmCacheOnStart:  false,
 	}
 }
 

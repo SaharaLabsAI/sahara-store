@@ -58,6 +58,8 @@ type Store struct {
 	listeners map[types.StoreKey]*types.MemoryListener
 
 	metrics metrics.StoreMetrics
+
+	warmCacheOnStart bool
 }
 
 func NewStore(logger log.Logger, root store.RootStore) *Store {
@@ -72,6 +74,10 @@ func NewStore(logger log.Logger, root store.RootStore) *Store {
 
 		listeners: make(map[types.StoreKey]*types.MemoryListener),
 	}
+}
+
+func (s *Store) SetWarmCacheOnStart() {
+	s.warmCacheOnStart = true
 }
 
 func (s *Store) Close() error {
@@ -313,6 +319,10 @@ func (s *Store) LoadLatestVersion() error {
 		return err
 	}
 
+	if !s.warmCacheOnStart {
+		return nil
+	}
+
 	eg := errgroup.Group{}
 	eg.SetLimit(store.MaxWriteParallelism)
 
@@ -323,11 +333,9 @@ func (s *Store) LoadLatestVersion() error {
 
 		eg.Go(func() error {
 			start := time.Now()
-			s.logger.Info(fmt.Sprintf("preload store %s", key.Name()))
-			fmt.Printf("preload store %s\n", key.Name())
+			s.logger.Warn(fmt.Sprintf("preload store %s", key.Name()))
 			defer func() {
-				s.logger.Info(fmt.Sprintf("store %s preldoaded, duration %d", key.Name(), time.Since(start).Milliseconds()))
-				fmt.Printf("store %s preldoaded, duration %d\n", key.Name(), time.Since(start).Milliseconds())
+				s.logger.Warn(fmt.Sprintf("store %s preldoaded, duration %d", key.Name(), time.Since(start).Milliseconds()))
 			}()
 
 			if err := store.(*compatiavl.Store).Warm(); err != nil {

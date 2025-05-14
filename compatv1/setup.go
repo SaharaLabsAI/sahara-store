@@ -23,48 +23,43 @@ func DefaultIavl2Options() *iavl_v2.TreeOptions {
 	return &opts
 }
 
+type SetupIAVL2Context struct {
+	logger           log.Logger
+	homePath         string
+	db               dbm.DB
+	appDBBackend     dbm.BackendType
+	pruningOptions   pruningtypes.PruningOptions
+	iavlOptions      *iavl_v2.TreeOptions
+	optimizeOnStart  bool
+	warmCacheOnStart bool
+}
+
 func SetupStoreIAVL2(
-	logger log.Logger,
-	db dbm.DB,
-	homePath string,
+	ctx SetupIAVL2Context,
 	baseAppOptions []func(*baseapp.BaseApp),
 	storeKeyNames []string,
-	appDBBackend dbm.BackendType,
-	pruningOptions pruningtypes.PruningOptions,
-	iavlOptions *iavl_v2.TreeOptions,
-	optimizeOnStart bool,
 ) []func(*baseapp.BaseApp) {
-	baseAppOptions = append([]func(*baseapp.BaseApp){
-		setup(logger, db, homePath, storeKeyNames, appDBBackend, pruningOptions, iavlOptions, optimizeOnStart),
-	}, baseAppOptions...)
-
-	return baseAppOptions
+	return append([]func(*baseapp.BaseApp){setup(ctx, storeKeyNames)}, baseAppOptions...)
 }
 
 func setup(
-	logger log.Logger,
-	db dbm.DB,
-	homePath string,
+	ctx SetupIAVL2Context,
 	storeKeyNames []string,
-	appDBBackend dbm.BackendType,
-	pruningOptions pruningtypes.PruningOptions,
-	iavlOptions *iavl_v2.TreeOptions,
-	optimizeOnStart bool,
 ) func(*baseapp.BaseApp) {
-	iavlOpts := *iavlOptions
-	if iavlOptions == nil {
+	iavlOpts := *ctx.iavlOptions
+	if ctx.iavlOptions == nil {
 		iavlOpts = iavlv2.DefaultOptions()
 	}
 
 	return func(bapp *baseapp.BaseApp) {
 		config := &root.Config{
-			Home:         homePath,
-			AppDBBackend: string(appDBBackend),
+			Home:         ctx.homePath,
+			AppDBBackend: string(ctx.appDBBackend),
 			Options: root.Options{
 				SCType: root.SCTypeIavlV2,
 				SCPruningOption: store.NewPruningOptionWithCustom(
-					pruningOptions.KeepRecent,
-					pruningOptions.Interval,
+					ctx.pruningOptions.KeepRecent,
+					ctx.pruningOptions.Interval,
 				),
 				IavlV2Config: iavlOpts,
 				StoreDBOptions: map[string]iavl_v2.SqliteDbOptions{
@@ -81,7 +76,7 @@ func setup(
 						CacheSize: -4 * 1024 * 1024, // 4G
 					},
 				},
-				OptimizeDBOnStart: optimizeOnStart,
+				OptimizeDBOnStart: ctx.optimizeOnStart,
 			},
 		}
 
@@ -90,11 +85,16 @@ func setup(
 			builder.RegisterKey(key)
 		}
 
-		store, err := builder.BuildWithDB(logger, db, config)
+		store, err := builder.BuildWithDB(ctx.logger, ctx.db, config)
 		if err != nil {
 			panic(fmt.Errorf("setup store iavl v2 %s", err))
 		}
 
-		bapp.SetCMS(rootmulti.NewStore(logger, store))
+		cms := rootmulti.NewStore(ctx.logger, store)
+		if ctx.warmCacheOnStart {
+			cms.SetWarmCacheOnStart()
+		}
+
+		bapp.SetCMS(cms)
 	}
 }
