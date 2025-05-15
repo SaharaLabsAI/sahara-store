@@ -110,6 +110,9 @@ func UnsafeNewStore(tree commstore.CompatV1Tree) *Store {
 func (s *Store) Commit() types.CommitID {
 	defer s.metrics.MeasureSince("store", "iavl", "commit")
 
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	hash, v, err := s.tree.Commit()
 	if err != nil {
 		panic(err)
@@ -141,6 +144,9 @@ func (s *Store) SetPruning(pruningtypes.PruningOptions) {
 
 // WorkingHash implements types.CommitStore.
 func (s *Store) WorkingHash() []byte {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	return s.tree.WorkingHash()
 }
 
