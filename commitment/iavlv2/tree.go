@@ -195,6 +195,6 @@ func isHighBitSet(version uint64) error {
 func DefaultOptions() iavl.TreeOptions {
 	opts := iavl.DefaultTreeOptions()
 	opts.HeightFilter = 1
-	opts.EvictionDepth = 32
+	opts.EvictionDepth = 26
 	return opts
 }
