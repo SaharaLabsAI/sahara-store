@@ -144,6 +144,8 @@ func (s *Store) SetPruning(pruningtypes.PruningOptions) {
 
 // WorkingHash implements types.CommitStore.
 func (s *Store) WorkingHash() []byte {
+	defer s.metrics.MeasureSince("store", "iavl", "working hash")
+
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
