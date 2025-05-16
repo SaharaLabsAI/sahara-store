@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/log"
+	"cosmossdk.io/store/metrics"
 	pruningtypes "cosmossdk.io/store/pruning/types"
 
 	dbm "github.com/cosmos/cosmos-db"
@@ -91,6 +92,8 @@ func setup(
 		}
 
 		cms := rootmulti.NewStore(ctx.Logger, store)
+		cms.SetMetrics(&metrics.Metrics{})
+
 		if ctx.WarmCacheOnStart {
 			cms.SetWarmCacheOnStart()
 		}

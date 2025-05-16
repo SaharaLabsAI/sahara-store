@@ -724,6 +724,14 @@ func (s *Store) TracingEnabled() bool {
 
 // WorkingHash implements types.CommitMultiStore.
 func (s *Store) WorkingHash() []byte {
+	if s.metrics != nil {
+		start := time.Now()
+		defer func() {
+			s.metrics.MeasureSince("store", "iavl2", "working_hash")
+			s.logger.Info("working hash", "duration", time.Since(start))
+		}()
+	}
+
 	storeInfos := make([]types.StoreInfo, 0, len(s.stores))
 
 	eg := errgroup.Group{}
