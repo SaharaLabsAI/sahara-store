@@ -33,8 +33,8 @@ var (
 	_ types.Queryable     = (*Store)(nil)
 )
 
-const lruCacheSize = 300_000
-const warnLeavesSize = 300_000
+const lruCacheSize = 100_000
+const warnLeavesSize = 100_000
 
 type Store struct {
 	tree  commstore.CompatV1Tree
