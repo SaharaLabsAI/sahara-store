@@ -178,11 +178,12 @@ func (t *Tree) Prune(version uint64) error {
 		return nil
 	}
 
-	return t.tree.DeleteVersionsToSync(int64(version))
+	return t.tree.DeleteVersionsTo(int64(version))
 }
 
-// PausePruning is unnecessary in IAVL v2 due to the advanced pruning mechanism
-func (t *Tree) PausePruning(bool) {}
+func (t *Tree) PausePruning(pause bool) {
+	t.tree.PausePruning(pause)
+}
 
 func (t *Tree) IsConcurrentSafe() bool {
 	return true
