@@ -436,7 +436,9 @@ func (s *Store) PopStateCache() []*types.StoreKVPair {
 
 // PruneSnapshotHeight implements types.CommitMultiStore.
 func (s *Store) PruneSnapshotHeight(height int64) {
-	// Not applicable to store v2 pruning manager
+	if err := s.root.Prune(uint64(height)); err != nil {
+		panic(err)
+	}
 }
 
 func (s *Store) GetStoreByName(name string) types.Store {

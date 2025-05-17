@@ -65,10 +65,10 @@ func (s *PruningManagerTestSuite) TestPrune() {
 				cs.Add([]byte(storeKey), []byte(fmt.Sprintf("key-%d-%d", version, i)), []byte(fmt.Sprintf("value-%d-%d", version, i)), false)
 			}
 		}
+
 		s.Require().NoError(s.sc.WriteChangeset(cs))
 		_, err := s.sc.Commit(version)
 		s.Require().NoError(err)
-
 		s.Require().NoError(s.manager.Prune(version))
 	}
 

@@ -430,11 +430,24 @@ func (c *CommitStore) Prune(version uint64) error {
 		}
 	}
 	// prune the trees
+	eg := new(errgroup.Group)
+	eg.SetLimit(store.MaxWriteParallelism)
 	for _, tree := range c.multiTrees {
-		if err := tree.Prune(version); err != nil {
-			return err
+		if tree.IsConcurrentSafe() {
+			eg.Go(func() error {
+				return tree.Prune(version)
+			})
+		} else {
+			if err := tree.Prune(version); err != nil {
+				return err
+			}
 		}
 	}
+
+	if err := eg.Wait(); err != nil {
+		return err
+	}
+
 	// prune the removed store keys
 	if err := c.pruneRemovedStoreKeys(version); err != nil {
 		return err

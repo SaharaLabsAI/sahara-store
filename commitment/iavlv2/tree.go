@@ -174,8 +174,11 @@ func (t *Tree) Close() error {
 }
 
 func (t *Tree) Prune(version uint64) error {
-	// do nothing, IAVL v2 has its own advanced pruning mechanism
-	return nil
+	if version == 0 {
+		return nil
+	}
+
+	return t.tree.DeleteVersionsToSync(int64(version))
 }
 
 // PausePruning is unnecessary in IAVL v2 due to the advanced pruning mechanism
