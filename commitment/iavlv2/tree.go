@@ -105,10 +105,10 @@ func (t *Tree) Get(version uint64, key []byte) ([]byte, error) {
 	if v > h {
 		return nil, fmt.Errorf("get: cannot read future version %d; h: %d path=%s", v, h, t.path)
 	}
-	versionFound, val, err := t.tree.GetRecent(v, key)
-	if versionFound {
-		return val, err
-	}
+	// versionFound, val, err := t.tree.GetRecent(v, key)
+	// if versionFound {
+	// 	return val, err
+	// }
 	imTree, err := t.tree.GetImmutable(int64(version))
 	if err != nil {
 		return nil, err
@@ -130,10 +130,10 @@ func (t *Tree) Iterator(version uint64, start, end []byte, ascending bool) (core
 	if v > h {
 		return nil, fmt.Errorf("iterator: cannot read future version %d; h: %d", v, h)
 	}
-	ok, itr := t.tree.IterateRecent(v, start, end, ascending)
-	if ok {
-		return itr, nil
-	}
+	// ok, itr := t.tree.IterateRecent(v, start, end, ascending)
+	// if ok {
+	// 	return itr, nil
+	// }
 	imTree, err := t.tree.GetImmutable(int64(version))
 	if err != nil {
 		return nil, err
