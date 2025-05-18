@@ -730,7 +730,8 @@ func (s *Store) WorkingHash() []byte {
 		start := time.Now()
 		defer func() {
 			s.metrics.MeasureSince("store", "iavl2", "working_hash")
-			s.logger.Info("working hash", "duration", time.Since(start))
+			storeLogger := s.logger.With("module", "store")
+			storeLogger.Info("working hash", "duration", time.Since(start))
 		}()
 	}
 
