@@ -169,11 +169,11 @@ func (s *Store) Delete(key []byte) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
+	s.cache.Remove(string(key))
+
 	if err := s.tree.Remove(key); err != nil {
 		panic(err)
 	}
-
-	s.cache.Remove(string(key))
 }
 
 // Get implements types.KVStore.
