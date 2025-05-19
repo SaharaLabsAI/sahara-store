@@ -192,9 +192,18 @@ func (s *Store) Commit() types.CommitID {
 	}
 
 	for _, store := range s.stores {
-		if store.GetStoreType() != types.StoreTypeIAVL {
-			_ = store.Commit()
+		storeType := store.GetStoreType()
+		if storeType == types.StoreTypeIAVL {
+			// Already committed above
+			continue
 		}
+
+		_ = store.Commit()
+	}
+
+	if err := s.root.Prune(latestVersion + 1); err != nil {
+		storeLogger := s.logger.With("module", "store")
+		storeLogger.Error("failed to prune store, please check your pruning configuration", "err", err)
 	}
 
 	return s.LastCommitID()
@@ -436,9 +445,7 @@ func (s *Store) PopStateCache() []*types.StoreKVPair {
 
 // PruneSnapshotHeight implements types.CommitMultiStore.
 func (s *Store) PruneSnapshotHeight(height int64) {
-	if err := s.root.Prune(uint64(height)); err != nil {
-		panic(err)
-	}
+	// TODO
 }
 
 func (s *Store) GetStoreByName(name string) types.Store {
