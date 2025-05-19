@@ -424,11 +424,20 @@ func (c *CommitStore) ReverseIterator(storeKey []byte, version uint64, start, en
 // Prune implements store.Pruner.
 func (c *CommitStore) Prune(version uint64) error {
 	// prune the metadata
-	for v := version; v > 0; v-- {
-		if err := c.metadata.deleteCommitInfo(v); err != nil {
+	// TODO: clear all leftover commit info
+	l := uint64(0)
+	if version < 3 {
+		l = 0
+	} else {
+		l = version - 3
+	}
+
+	for i := version; i > l; i-- {
+		if err := c.metadata.deleteCommitInfo(version); err != nil {
 			return err
 		}
 	}
+
 	// prune the trees
 	eg := new(errgroup.Group)
 	eg.SetLimit(store.MaxWriteParallelism)
