@@ -376,6 +376,11 @@ func (c *CommitStore) VersionExists(version uint64) (bool, error) {
 		return version == 0, nil
 	}
 
+	// We first check if our tree has this version, since we don't prune metadata anymore
+	if err := c.checkTreeVersion(version); err != nil {
+		return false, err
+	}
+
 	ci, err := c.metadata.GetCommitInfo(version)
 	return ci != nil, err
 }
@@ -424,19 +429,12 @@ func (c *CommitStore) ReverseIterator(storeKey []byte, version uint64, start, en
 // Prune implements store.Pruner.
 func (c *CommitStore) Prune(version uint64) error {
 	// prune the metadata
-	// TODO: clear all leftover commit info
-	l := uint64(0)
-	if version < 3 {
-		l = 0
-	} else {
-		l = version - 3
-	}
-
-	for i := version; i > l; i-- {
-		if err := c.metadata.deleteCommitInfo(version); err != nil {
-			return err
-		}
-	}
+	// TODO: maybe use kv store in iavl2?
+	// for v := version; v > 0; v-- {
+	// 	if err := c.metadata.deleteCommitInfo(v); err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	// prune the trees
 	eg := new(errgroup.Group)
@@ -674,4 +672,19 @@ func (c *CommitStore) Close() error {
 
 func (c *CommitStore) FlushCommitInfo(ci *proof.CommitInfo) error {
 	return c.metadata.flushCommitInfo(ci.Version, ci)
+}
+
+func (c *CommitStore) checkTreeVersion(version uint64) error {
+	for _, tree := range c.multiTrees {
+		if exists := tree.VersionExists(version); !exists {
+			return fmt.Errorf("version %d not found", version)
+		}
+	}
+	for _, tree := range c.oldTrees {
+		if exists := tree.VersionExists(version); !exists {
+			return fmt.Errorf("version %d not found", version)
+		}
+	}
+
+	return nil
 }
