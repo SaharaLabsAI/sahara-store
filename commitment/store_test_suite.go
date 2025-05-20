@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 
@@ -229,13 +230,31 @@ func (s *CommitStoreTestSuite) TestStore_Pruning() {
 	}
 
 	pruneVersion := latestVersion - pruneOpts.KeepRecent - 1
+
 	// check the store
+	// NOTE: we dont prune commit info anymore
+	// for i := uint64(1); i <= latestVersion; i++ {
+	// 	commitInfo, _ := commitStore.GetCommitInfo(i)
+	// 	if i <= pruneVersion {
+	// 		s.Require().Nil(commitInfo)
+	// 	} else {
+	// 		s.Require().NotNil(commitInfo)
+	// 	}
+	// }
+
+	checkVersionPrune := func() bool {
+		_, err := commitStore.VersionExists(pruneVersion)
+		return err != nil
+	}
+
+	s.Require().Eventually(checkVersionPrune, 10*time.Second, 1*time.Second)
+
 	for i := uint64(1); i <= latestVersion; i++ {
-		commitInfo, _ := commitStore.GetCommitInfo(i)
+		exists, _ := commitStore.VersionExists(i)
 		if i <= pruneVersion {
-			s.Require().Nil(commitInfo)
+			s.Require().False(exists)
 		} else {
-			s.Require().NotNil(commitInfo)
+			s.Require().True(exists)
 		}
 	}
 }
@@ -275,12 +294,21 @@ func (s *CommitStoreTestSuite) TestStore_GetProof() {
 	// prune version 1
 	s.Require().NoError(commitStore.Prune(1))
 
+	checkVersionPrune := func() bool {
+		_, err := commitStore.VersionExists(1)
+		return err != nil
+	}
+
+	s.Require().Eventually(checkVersionPrune, 10*time.Second, 1*time.Second)
+
 	// check if proof for version 1 is pruned
 	_, err = commitStore.GetProof([]byte(storeKeys[0]), 1, []byte(fmt.Sprintf("key-%d-%d", 1, 0)))
 	s.Require().Error(err)
+
 	// check the commit info
-	commit, _ := commitStore.GetCommitInfo(1)
-	s.Require().Nil(commit)
+	// NOTE: we don't prune commit info anymore
+	// commit, _ := commitStore.GetCommitInfo(1)
+	// s.Require().Nil(commit)
 }
 
 func (s *CommitStoreTestSuite) TestStore_Get() {
@@ -420,12 +448,16 @@ func (s *CommitStoreTestSuite) TestStore_Upgrades() {
 		Deleted: []string{storeKey2},
 		Added:   []string{"newStore3"},
 	}
-	newRealStoreKeys := []string{storeKey1, "newStore1", "newStore2", "newStore3"}
-	oldStoreKeys = []string{storeKey2, storeKey3}
+	newRealStoreKeys := []string{storeKey1, storeKey2, "newStore1", "newStore2", "newStore3"}
+	// IMPORTANT: we should also add pending deleted storeKey2 here to make sure it will be mounted as an oldtree
+	oldStoreKeys = []string{storeKey3, storeKey2}
 	commitStore, err = s.NewStore(commitDB, commitDir, newRealStoreKeys, oldStoreKeys, coretesting.NewNopLogger())
 	s.Require().NoError(err)
 	err = commitStore.LoadVersionAndUpgrade(2*latestVersion-1, upgrades)
 	s.Require().NoError(err)
+
+	// Now storeKey2 is deleted
+	newRealStoreKeys = []string{storeKey1, "newStore1", "newStore2", "newStore3"}
 
 	// apply the changeset again
 	for i := latestVersion * 2; i < latestVersion*3; i++ {
@@ -452,6 +484,13 @@ func (s *CommitStoreTestSuite) TestStore_Upgrades() {
 	// prune the old stores
 	s.Require().NoError(commitStore.Prune(latestVersion))
 	s.T().Logf("prune to version %d", latestVersion)
+
+	checkVersionPrune := func() bool {
+		_, err := commitStore.VersionExists(latestVersion)
+		return err != nil
+	}
+	s.Require().Eventually(checkVersionPrune, 10*time.Second, 1*time.Second)
+
 	// GetProof should fail for the old stores
 	for _, storeKey := range []string{storeKey1, storeKey3} {
 		for i := uint64(1); i <= latestVersion; i++ {
@@ -473,6 +512,13 @@ func (s *CommitStoreTestSuite) TestStore_Upgrades() {
 
 	s.T().Logf("Prune to version %d", latestVersion*2)
 	s.Require().NoError(commitStore.Prune(latestVersion * 2))
+
+	checkVersionPrune = func() bool {
+		_, err := commitStore.VersionExists(latestVersion * 2)
+		return err != nil
+	}
+	s.Require().Eventually(checkVersionPrune, 10*time.Second, 1*time.Second)
+
 	// GetProof should fail for the newly deleted stores
 	for i := uint64(1); i < latestVersion*2; i++ {
 		for j := 0; j < kvCount; j++ {

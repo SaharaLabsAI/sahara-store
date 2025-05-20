@@ -163,18 +163,19 @@ func (s *PruningManagerTestSuite) TestSignalCommit() {
 
 	// proof is removed no matter SignalCommit has not yet inform that commit process has finish
 	// since commitInfo is remove async with tree data
-	checkSCPrune := func() bool {
-		count := 0
-		for _, storeKey := range storeKeys {
-			_, err := s.sc.GetProof([]byte(storeKey), 1, []byte(fmt.Sprintf("key-%d-%d", 1, 0)))
-			if err != nil {
-				count++
-			}
-		}
-
-		return count == len(storeKeys)
-	}
-	s.Require().Eventually(checkSCPrune, 10*time.Second, 1*time.Second)
+	// TODO: we don't prune commit info anymore, only state
+	// checkSCPrune := func() bool {
+	// 	count := 0
+	// 	for _, storeKey := range storeKeys {
+	// 		_, err := s.sc.GetProof([]byte(storeKey), 1, []byte(fmt.Sprintf("key-%d-%d", 1, 0)))
+	// 		if err != nil {
+	// 			count++
+	// 		}
+	// 	}
+	//
+	// 	return count == len(storeKeys)
+	// }
+	// s.Require().Eventually(checkSCPrune, 10*time.Second, 1*time.Second)
 
 	// data from state commitment should not be pruned since we haven't signal the commit process has finished
 	val, err := s.sc.Get([]byte(storeKeys[0]), 1, []byte(fmt.Sprintf("key-%d-%d", 1, 0)))
@@ -185,7 +186,7 @@ func (s *PruningManagerTestSuite) TestSignalCommit() {
 	err = s.manager.ResumePruning(2)
 	s.Require().NoError(err)
 
-	checkSCPrune = func() bool {
+	checkSCPrune := func() bool {
 		count := 0
 		for _, storeKey := range storeKeys {
 			_, err := s.sc.GetProof([]byte(storeKey), 1, []byte(fmt.Sprintf("key-%d-%d", 1, 0)))
