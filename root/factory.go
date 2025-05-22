@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"sync"
 
+	"cosmossdk.io/log"
+
 	iavl_v2 "github.com/cosmos/iavl/v2"
 	"golang.org/x/sync/errgroup"
 
 	store "github.com/SaharaLabsAI/sahara-store"
 	"github.com/SaharaLabsAI/sahara-store/commitment"
 	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
-	"github.com/SaharaLabsAI/sahara-store/core/log"
+
 	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
 	"github.com/SaharaLabsAI/sahara-store/internal"
 	"github.com/SaharaLabsAI/sahara-store/metrics"
@@ -109,7 +111,7 @@ func CreateRootStore(opts *FactoryOptions) (store.RootStore, error) {
 				opts.Options.IavlV2Config.MetricsProxy = metrics
 				dir := fmt.Sprintf("%s/data/iavl2/%s", opts.RootDir, key)
 
-				dbOpts := iavl_v2.SqliteDbOptions{Path: dir, Metrics: metrics}
+				dbOpts := iavl_v2.SqliteDbOptions{Path: dir, Metrics: metrics, Logger: opts.Logger.With("module", "iavl2")}
 				storeDbOpts, exists := opts.Options.StoreDBOptions[key]
 				if exists {
 					storeDbOpts.Path = dir

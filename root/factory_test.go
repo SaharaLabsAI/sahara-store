@@ -3,9 +3,9 @@ package root
 import (
 	"testing"
 
+	"cosmossdk.io/log"
 	"github.com/stretchr/testify/require"
 
-	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
 	"github.com/SaharaLabsAI/sahara-store/db"
 )
 
@@ -13,7 +13,7 @@ var storeKeys = []string{"store1", "store2", "store3"}
 
 func TestFactory(t *testing.T) {
 	fop := FactoryOptions{
-		Logger:    coretesting.NewNopLogger(),
+		Logger:    log.NewNopLogger(),
 		RootDir:   t.TempDir(),
 		Options:   DefaultStoreOptions(),
 		StoreKeys: storeKeys,
