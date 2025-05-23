@@ -91,7 +91,7 @@ func setup(
 			panic(fmt.Errorf("setup store iavl v2 %s", err))
 		}
 
-		cms := rootmulti.NewStore(ctx.Logger, store)
+		cms := rootmulti.NewStore(ctx.Logger, store, ctx.Db)
 		cms.SetMetrics(&metrics.Metrics{})
 
 		if ctx.WarmCacheOnStart {

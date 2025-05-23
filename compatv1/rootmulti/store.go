@@ -15,6 +15,7 @@ import (
 	"cosmossdk.io/store/listenkv"
 	"cosmossdk.io/store/mem"
 	"cosmossdk.io/store/metrics"
+	"cosmossdk.io/store/pruning"
 	pruningtypes "cosmossdk.io/store/pruning/types"
 	snapshottypes "cosmossdk.io/store/snapshots/types"
 	"cosmossdk.io/store/tracekv"
@@ -45,7 +46,8 @@ var (
 type Store struct {
 	logger log.Logger
 
-	root store.RootStore
+	root                   store.RootStore
+	snapshotPruningManager *pruning.Manager
 
 	keysByName map[string]types.StoreKey
 	storeTypes map[types.StoreKey]types.StoreType
@@ -62,11 +64,12 @@ type Store struct {
 	warmCacheOnStart bool
 }
 
-func NewStore(logger log.Logger, root store.RootStore) *Store {
+func NewStore(logger log.Logger, root store.RootStore, db db.DB) *Store {
 	return &Store{
 		logger: logger,
 
-		root: root,
+		root:                   root,
+		snapshotPruningManager: pruning.NewManager(db, logger),
 
 		keysByName: make(map[string]types.StoreKey),
 		storeTypes: make(map[types.StoreKey]types.StoreType),
@@ -445,7 +448,7 @@ func (s *Store) PopStateCache() []*types.StoreKVPair {
 
 // PruneSnapshotHeight implements types.CommitMultiStore.
 func (s *Store) PruneSnapshotHeight(height int64) {
-	// TODO
+	s.snapshotPruningManager.HandleSnapshotHeight(height)
 }
 
 func (s *Store) GetStoreByName(name string) types.Store {
@@ -592,11 +595,12 @@ func (s *Store) SetPruning(opt pruningtypes.PruningOptions) {
 		KeepRecent: opt.KeepRecent,
 		Interval:   opt.Interval,
 	})
+	s.snapshotPruningManager.SetOptions(opt)
 }
 
 // SetSnapshotInterval implements types.CommitMultiStore.
 func (s *Store) SetSnapshotInterval(snapshotInterval uint64) {
-	// Not applicable to store v2 pruning manager
+	s.snapshotPruningManager.SetSnapshotInterval(snapshotInterval)
 }
 
 // SetTracer implements types.CommitMultiStore.

@@ -54,7 +54,7 @@ func newMultiStoreWithGeneratedData(db dbm.DB, stores uint8, storeKeys uint64, h
 		panic(err)
 	}
 
-	multiStore := NewStore(logger, root)
+	multiStore := NewStore(logger, root, db)
 
 	r := rand.New(rand.NewSource(49872768940)) // Fixed seed for deterministic tests
 
@@ -118,7 +118,7 @@ func newMultiStoreWithMixedMounts(db dbm.DB, home string) *Store {
 		panic(err)
 	}
 
-	store := NewStore(log.NewNopLogger(), root)
+	store := NewStore(log.NewNopLogger(), root, db)
 
 	store.MountStoreWithDB(types.NewKVStoreKey("iavl1"), types.StoreTypeIAVL, nil)
 	store.MountStoreWithDB(types.NewKVStoreKey("iavl2"), types.StoreTypeIAVL, nil)
@@ -328,7 +328,7 @@ func benchmarkMultistoreSnapshot(b *testing.B, stores uint8, storeKeys uint64) {
 			panic(err)
 		}
 
-		target := NewStore(logger, root)
+		target := NewStore(logger, root, dbm.NewMemDB())
 		for _, key := range source.StoreKeysByName() {
 			target.MountStoreWithDB(key, types.StoreTypeIAVL, nil)
 		}
@@ -390,7 +390,7 @@ func benchmarkMultistoreSnapshotRestore(b *testing.B, stores uint8, storeKeys ui
 			panic(err)
 		}
 
-		target := NewStore(logger, root)
+		target := NewStore(logger, root, dbm.NewMemDB())
 		for _, key := range source.StoreKeysByName() {
 			target.MountStoreWithDB(key, types.StoreTypeIAVL, nil)
 		}
