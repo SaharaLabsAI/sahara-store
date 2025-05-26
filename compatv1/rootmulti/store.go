@@ -209,7 +209,15 @@ func (s *Store) Commit() types.CommitID {
 		storeLogger.Error("failed to prune store, please check your pruning configuration", "err", err)
 	}
 
-	return s.LastCommitID()
+	commitID, err := s.root.LastCommitID()
+	if err != nil {
+		panic(err)
+	}
+
+	return types.CommitID{
+		Version: int64(commitID.Version),
+		Hash:    commitID.Hash,
+	}
 }
 
 // GetCommitKVStore implements types.CommitMultiStore.
@@ -785,6 +793,11 @@ func (s *Store) WorkingHash() []byte {
 	sort.SliceStable(storeInfos, func(i, j int) bool {
 		return storeInfos[i].Name < storeInfos[j].Name
 	})
+
+	// storeLogger := s.logger.With("module", "store")
+	// for _, info := range storeInfos {
+	// 	storeLogger.Info("store working hash", "store", info.Name, "hash", fmt.Sprintf("%x", info.CommitId.Hash))
+	// }
 
 	workingHash := types.CommitInfo{StoreInfos: storeInfos}.Hash()
 

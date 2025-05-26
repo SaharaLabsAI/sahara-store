@@ -56,6 +56,8 @@ type Store struct {
 	chDone chan struct{}
 	// isMigrating reflects whether the store is currently migrating
 	isMigrating bool
+
+	rw sync.RWMutex
 }
 
 // New creates a new root Store instance.
@@ -136,30 +138,36 @@ func (s *Store) GetStateCommitment() store.Committer {
 // If an internal CommitInfo is not set, a new one will be returned with only the
 // latest version set, which is based off of the SC view.
 func (s *Store) LastCommitID() (proof.CommitID, error) {
-	if s.lastCommitInfo != nil {
-		// TODO: this is a temporary work around
-		if s.lastCommitInfo.Version == 0 {
-			hash := sha256.Sum256([]byte{})
-			s.lastCommitInfo.CommitHash = hash[:]
+	s.rw.RLock()
+	defer s.rw.RUnlock()
+
+	if s.lastCommitInfo == nil {
+		latestVersion, err := s.stateCommitment.GetLatestVersion()
+		if err != nil {
+			return proof.CommitID{}, err
 		}
-		return *s.lastCommitInfo.CommitID(), nil
+
+		// if the latest version is 0, we return a CommitID with version 0 and a hash of an empty byte slice
+		bz := sha256.Sum256([]byte{})
+
+		return proof.CommitID{Version: latestVersion, Hash: bz[:]}, nil
 	}
 
-	latestVersion, err := s.stateCommitment.GetLatestVersion()
-	if err != nil {
-		return proof.CommitID{}, err
+	if s.lastCommitInfo.Version == 0 {
+		hash := sha256.Sum256([]byte{})
+		return proof.CommitID{Version: 0, Hash: hash[:]}, nil
 	}
 
-	// if the latest version is 0, we return a CommitID with version 0 and a hash of an empty byte slice
-	bz := sha256.Sum256([]byte{})
-
-	return proof.CommitID{Version: latestVersion, Hash: bz[:]}, nil
+	return *s.lastCommitInfo.CommitID(), nil
 }
 
 // GetLatestVersion returns the latest version based on the latest internal
 // CommitInfo. An error is returned if the latest CommitInfo or version cannot
 // be retrieved.
 func (s *Store) GetLatestVersion() (uint64, error) {
+	s.rw.RLock()
+	defer s.rw.RUnlock()
+
 	lastCommitID, err := s.LastCommitID()
 	if err != nil {
 		return 0, err
@@ -246,6 +254,9 @@ func (s *Store) LoadVersionAndUpgrade(version uint64, upgrades *corestore.StoreU
 }
 
 func (s *Store) loadVersion(v uint64, upgrades *corestore.StoreUpgrades, overrideAfter bool) error {
+	s.rw.Lock()
+	defer s.rw.Unlock()
+
 	s.logger.Debug("loading version", "version", v)
 
 	if upgrades == nil {
@@ -285,6 +296,9 @@ func (s *Store) loadVersion(v uint64, upgrades *corestore.StoreUpgrades, overrid
 // from the SC tree. Finally, it commits the SC tree and returns the hash of
 // the CommitInfo.
 func (s *Store) Commit(cs *corestore.Changeset) ([]byte, error) {
+	s.rw.Lock()
+	defer s.rw.Unlock()
+
 	if s.telemetry != nil {
 		start := time.Now()
 		defer func() {
@@ -392,6 +406,9 @@ func (s *Store) SetPruningOption(opt store.PruningOption) {
 }
 
 func (s *Store) FlushCommitInfo(ci *proof.CommitInfo) error {
+	s.rw.Lock()
+	defer s.rw.Unlock()
+
 	if err := s.stateCommitment.(*commitment.CommitStore).FlushCommitInfo(ci); err != nil {
 		return err
 	}
