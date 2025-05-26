@@ -106,9 +106,22 @@ func UnsafeNewStore(tree commstore.CompatV1Tree) *Store {
 	}
 }
 
+func (s *Store) WriteChangeSet() error {
+	defer s.metrics.MeasureSince("store", "iavl", "write_change_set")
+
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	return s.tree.WriteChangeSet()
+}
+
 // Commit implements types.CommitStore.
 func (s *Store) Commit() types.CommitID {
 	defer s.metrics.MeasureSince("store", "iavl", "commit")
+
+	if err := s.tree.WriteChangeSet(); err != nil {
+		panic(err)
+	}
 
 	s.lock.Lock()
 	defer s.lock.Unlock()
@@ -164,6 +177,8 @@ func (s *Store) CacheWrapWithTrace(w io.Writer, tc types.TraceContext) types.Cac
 
 // Delete implements types.KVStore.
 func (s *Store) Delete(key []byte) {
+	types.AssertValidKey(key)
+
 	defer s.metrics.MeasureSince("store", "iavl", "delete")
 
 	s.lock.Lock()

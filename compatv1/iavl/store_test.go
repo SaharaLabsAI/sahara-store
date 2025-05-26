@@ -204,11 +204,15 @@ func TestIAVLStoreGetSetHasDelete(t *testing.T) {
 
 	value2 := "notgoodbye"
 	iavlStore.Set([]byte(key), []byte(value2))
+	err := iavlStore.WriteChangeSet()
+	require.NoError(t, err)
 
 	value = iavlStore.Get([]byte(key))
 	require.EqualValues(t, value, value2)
 
 	iavlStore.Delete([]byte(key))
+	err = iavlStore.WriteChangeSet()
+	require.NoError(t, err)
 
 	exists = iavlStore.Has([]byte(key))
 	require.False(t, exists)
@@ -316,6 +320,8 @@ func TestIAVLReverseIterator(t *testing.T) {
 	iavlStore.Set([]byte{0x00, 0x01}, []byte("0 1"))
 	iavlStore.Set([]byte{0x00, 0x02}, []byte("0 2"))
 	iavlStore.Set([]byte{0x01}, []byte("1"))
+	err = iavlStore.WriteChangeSet()
+	require.NoError(t, err)
 
 	testReverseIterator := func(t *testing.T, start, end []byte, expected []string) {
 		t.Helper()
@@ -362,6 +368,8 @@ func TestIAVLPrefixIterator(t *testing.T) {
 	iavlStore.Set([]byte{byte(255), byte(255), byte(0)}, []byte("test4"))
 	iavlStore.Set([]byte{byte(255), byte(255), byte(1)}, []byte("test4"))
 	iavlStore.Set([]byte{byte(255), byte(255), byte(255)}, []byte("test4"))
+	err = iavlStore.WriteChangeSet()
+	require.NoError(t, err)
 
 	var i int
 
@@ -434,6 +442,8 @@ func TestIAVLReversePrefixIterator(t *testing.T) {
 	iavlStore.Set([]byte{byte(255), byte(255), byte(0)}, []byte("test4"))
 	iavlStore.Set([]byte{byte(255), byte(255), byte(1)}, []byte("test4"))
 	iavlStore.Set([]byte{byte(255), byte(255), byte(255)}, []byte("test4"))
+	err = iavlStore.WriteChangeSet()
+	require.NoError(t, err)
 
 	var i int
 

@@ -23,6 +23,8 @@ type Tree struct {
 	tree *iavl.Tree
 	log  log.Logger
 	path string
+
+	ops []iavl.BatchOperation
 }
 
 func NewTree(
@@ -40,13 +42,13 @@ func NewTree(
 }
 
 func (t *Tree) Set(key, value []byte) error {
-	_, err := t.tree.Set(key, value)
-	return err
+	t.ops = append(t.ops, iavl.NewSetOperation(key, value))
+	return nil
 }
 
 func (t *Tree) Remove(key []byte) error {
-	_, _, err := t.tree.Remove(key)
-	return err
+	t.ops = append(t.ops, iavl.NewRemoveOperation(key))
+	return nil
 }
 
 func (t *Tree) GetLatestVersion() (uint64, error) {
@@ -77,7 +79,19 @@ func (t *Tree) LoadVersionForOverwriting(version uint64) error {
 	return t.LoadVersion(version)
 }
 
+func (t *Tree) WriteChangeSet() error {
+	defer func() {
+		t.ops = nil
+	}()
+
+	return t.tree.BatchSetRemove(t.ops)
+}
+
 func (t *Tree) Commit() ([]byte, uint64, error) {
+	if err := t.WriteChangeSet(); err != nil {
+		return nil, uint64(t.tree.Version()), err
+	}
+
 	h, v, err := t.tree.SaveVersion()
 	return h, uint64(v), err
 }

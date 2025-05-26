@@ -770,6 +770,10 @@ func (s *Store) WorkingHash() []byte {
 		ss := store
 
 		eg.Go(func() error {
+			if err := ss.(*compatiavl.Store).WriteChangeSet(); err != nil {
+				return err
+			}
+
 			si := types.StoreInfo{
 				Name: k.Name(),
 				CommitId: types.CommitID{

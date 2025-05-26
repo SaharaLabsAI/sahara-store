@@ -90,9 +90,17 @@ func (c *CommitStore) WriteChangeset(cs *corestore.Changeset) error {
 		}
 		if tree.IsConcurrentSafe() {
 			eg.Go(func() error {
+				if err := tree.WriteChangeSet(); err != nil {
+					return err
+				}
+
 				return writeChangeset(tree, pairs)
 			})
 		} else {
+			if err := tree.WriteChangeSet(); err != nil {
+				return err
+			}
+
 			if err := writeChangeset(tree, pairs); err != nil {
 				return err
 			}
