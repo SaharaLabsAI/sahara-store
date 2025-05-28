@@ -36,8 +36,8 @@ github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/DataDog/zstd v1.5.5 h1:oWf5W7GtOLgp6bciQYDmhHHjdhYkALu6S/5Ni9ZgSvQ=
 github.com/DataDog/zstd v1.5.5/go.mod h1:g4AWEaM3yOg3HYfnJ3YIawPnVdXJh9QME85blwSAmyw=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
-github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.33 h1:LwSQvjd8YlhcaXXP4RUE8pCK8YBwzocFLGQ1kLeXFXw=
-github.com/SaharaLabsAI/iavl/v2 v2.0.0-alpha.5.33/go.mod h1:m06ZxmVdnpRcJ/LBkhqAB5bSKXOQOmCZpvK3pRmQF4Q=
+github.com/SaharaLabsAI/iavl/v2 v2.0.0-beta h1:ruiiGIskt5qY0Fv6yiQmqQ8XPsj+P2CCQ4OgDLsKj4w=
+github.com/SaharaLabsAI/iavl/v2 v2.0.0-beta/go.mod h1:m06ZxmVdnpRcJ/LBkhqAB5bSKXOQOmCZpvK3pRmQF4Q=
 github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250510023746-bdd64c4ad0c9 h1:ufeztnpd8AoD9CWRgvDbNhWrfYUPURS4FczfTQ5Z3Cc=
 github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250510023746-bdd64c4ad0c9/go.mod h1:ToBlV+xPf8QZ8DRmicoOY+tBvGdNUTtBT20T4LfNgCU=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
