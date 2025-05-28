@@ -7,6 +7,7 @@ toolchain go1.23.5
 replace (
 	github.com/SaharaLabsAI/sahara-store => ../
 	github.com/SaharaLabsAI/sahara-store/core => ../core
+	github.com/SaharaLabsAI/sahara-store/core/testing => ../core/testing
 	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.0.1-beta
 )
 
@@ -14,9 +15,9 @@ require (
 	cosmossdk.io/errors v1.0.1
 	cosmossdk.io/log v1.5.0
 	cosmossdk.io/store v1.1.1
-	github.com/SaharaLabsAI/sahara-store v0.0.0-20250510023746-bdd64c4ad0c9
-	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250510023746-bdd64c4ad0c9
-	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250510023746-bdd64c4ad0c9
+	github.com/SaharaLabsAI/sahara-store v1.0.0-beta.4
+	github.com/SaharaLabsAI/sahara-store/core v1.0.0-beta.4
+	github.com/SaharaLabsAI/sahara-store/core/testing v1.0.0-beta.4
 	github.com/cometbft/cometbft v0.38.17
 	github.com/cosmos/cosmos-db v1.1.1
 	github.com/cosmos/cosmos-sdk v0.50.13
