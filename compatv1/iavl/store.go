@@ -381,6 +381,7 @@ func (s *Store) Query(req *types.RequestQuery) (res *types.ResponseQuery, err er
 		if err != nil {
 			panic(fmt.Sprintf("version exists in store but could not retrieve corresponding versioned tree in store, %s", err.Error()))
 		}
+		defer imTree.DiscardImmutable()
 
 		value, err := imTree.GetDirty(key)
 		if err != nil {
@@ -405,6 +406,7 @@ func (s *Store) Query(req *types.RequestQuery) (res *types.ResponseQuery, err er
 		if err != nil {
 			panic(fmt.Sprintf("version exists in store but could not retrieve corresponding versioned tree in store, %s", err.Error()))
 		}
+		defer imTree.DiscardImmutable()
 
 		iter, err := imTree.IteratorDirty(subspace, prefixEndBytes(subspace), true)
 		if err != nil {
