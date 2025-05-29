@@ -167,7 +167,7 @@ func assertStoresEqual(t *testing.T, expect, actual types.CommitKVStore, msgAndA
 	}
 	require.NoError(t, expectIter.Error())
 
-	actualIter := expect.Iterator(nil, nil)
+	actualIter := actual.Iterator(nil, nil)
 	actualMap := map[string][]byte{}
 	for ; actualIter.Valid(); actualIter.Next() {
 		actualMap[string(actualIter.Key())] = actualIter.Value()
