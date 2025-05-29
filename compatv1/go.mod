@@ -8,7 +8,7 @@ replace (
 	github.com/SaharaLabsAI/sahara-store => ../
 	github.com/SaharaLabsAI/sahara-store/core => ../core
 	github.com/SaharaLabsAI/sahara-store/core/testing => ../core/testing
-	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.0.1-beta
+	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.0.1-beta.2
 )
 
 require (
