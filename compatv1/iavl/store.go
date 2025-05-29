@@ -44,8 +44,10 @@ type Store struct {
 	metrics metrics.StoreMetrics
 }
 
+type StoreOption func(*Store) error
+
 // LoadStore from given root store, the tree version is
-func LoadStore(root store.RootStore, storeKey types.StoreKey, storeMetrics metrics.StoreMetrics) *Store {
+func LoadStore(root store.RootStore, storeKey types.StoreKey, storeMetrics metrics.StoreMetrics, opts ...StoreOption) *Store {
 	if storeMetrics == nil {
 		storeMetrics = metrics.NewNoOpMetrics()
 	}
@@ -60,10 +62,25 @@ func LoadStore(root store.RootStore, storeKey types.StoreKey, storeMetrics metri
 		panic(err)
 	}
 
-	return &Store{
+	s := Store{
 		tree:    tree,
 		cache:   cache,
 		metrics: storeMetrics,
+	}
+
+	for _, opt := range opts {
+		if err := opt(&s); err != nil {
+			panic(err)
+		}
+	}
+
+	return &s
+}
+
+func StoreLRUCacheSize(size int) StoreOption {
+	return func(s *Store) (err error) {
+		s.cache, err = lru.New[string, any](size)
+		return err
 	}
 }
 
