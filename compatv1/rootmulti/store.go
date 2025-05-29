@@ -59,12 +59,24 @@ type Store struct {
 
 	listeners map[types.StoreKey]*types.MemoryListener
 
-	metrics metrics.StoreMetrics
+	opt StoreOption
 
-	warmCacheOnStart bool
+	metrics metrics.StoreMetrics
 }
 
-func NewStore(logger log.Logger, root store.RootStore, db db.DB) *Store {
+type StoreOption struct {
+	LRUSize          map[string]int
+	WarmCacheOnStart bool
+}
+
+func DefaultStoreOption() StoreOption {
+	return StoreOption{
+		LRUSize:          make(map[string]int),
+		WarmCacheOnStart: false,
+	}
+}
+
+func NewStore(logger log.Logger, root store.RootStore, db db.DB, opt StoreOption) *Store {
 	return &Store{
 		logger: logger,
 
@@ -75,12 +87,10 @@ func NewStore(logger log.Logger, root store.RootStore, db db.DB) *Store {
 		storeTypes: make(map[types.StoreKey]types.StoreType),
 		stores:     make(map[types.StoreKey]types.CommitKVStore),
 
+		opt: opt,
+
 		listeners: make(map[types.StoreKey]*types.MemoryListener),
 	}
-}
-
-func (s *Store) SetWarmCacheOnStart() {
-	s.warmCacheOnStart = true
 }
 
 func (s *Store) Close() error {
@@ -339,7 +349,7 @@ func (s *Store) LoadLatestVersion() error {
 		return err
 	}
 
-	if !s.warmCacheOnStart {
+	if !s.opt.WarmCacheOnStart {
 		return nil
 	}
 
@@ -830,7 +840,12 @@ func (s *Store) loadCommitStoreFromParams(key types.StoreKey, typ types.StoreTyp
 	case types.StoreTypeMulti:
 		panic("recursive MultiStores not yet supported")
 	case types.StoreTypeIAVL:
-		return compatiavl.LoadStore(s.root, key, s.metrics), nil
+		lruSize, exists := s.opt.LRUSize[key.Name()]
+		if exists {
+			return compatiavl.LoadStore(s.root, key, s.metrics, compatiavl.StoreLRUCacheSize(lruSize)), nil
+		} else {
+			return compatiavl.LoadStore(s.root, key, s.metrics), nil
+		}
 	case types.StoreTypeDB:
 		panic("recursive MultiStores not yet supported")
 	case types.StoreTypeTransient:

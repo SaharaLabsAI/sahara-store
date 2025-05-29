@@ -91,12 +91,16 @@ func setup(
 			panic(fmt.Errorf("setup store iavl v2 %s", err))
 		}
 
-		cms := rootmulti.NewStore(ctx.Logger, store, ctx.Db)
-		cms.SetMetrics(&metrics.Metrics{})
-
-		if ctx.WarmCacheOnStart {
-			cms.SetWarmCacheOnStart()
+		cmsOpt := rootmulti.StoreOption{
+			WarmCacheOnStart: ctx.WarmCacheOnStart,
+			LRUSize: map[string]int{
+				"staking": 2000,
+				"bank":    100_000,
+				"acc":     100_000,
+			},
 		}
+		cms := rootmulti.NewStore(ctx.Logger, store, ctx.Db, cmsOpt)
+		cms.SetMetrics(&metrics.Metrics{})
 
 		bapp.SetCMS(cms)
 	}
