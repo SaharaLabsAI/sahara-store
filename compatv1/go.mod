@@ -15,7 +15,7 @@ require (
 	cosmossdk.io/errors v1.0.1
 	cosmossdk.io/log v1.5.0
 	cosmossdk.io/store v1.1.1
-	github.com/SaharaLabsAI/sahara-store v1.0.0-beta.5
+	github.com/SaharaLabsAI/sahara-store v1.0.0-beta.7.0.20250529124827-ec2dc21bcc51
 	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250528091029-801b0e19f9b9
 	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250528091029-801b0e19f9b9
 	github.com/cometbft/cometbft v0.38.17
