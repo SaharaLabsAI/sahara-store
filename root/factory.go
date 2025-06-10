@@ -7,8 +7,10 @@ import (
 
 	"cosmossdk.io/log"
 
-	iavl_v2 "github.com/cosmos/iavl/v2"
 	"golang.org/x/sync/errgroup"
+
+	iavl2sql "github.com/cosmos/iavl/v2/db/sqlite"
+	iavl2 "github.com/cosmos/iavl/v2/tree"
 
 	store "github.com/SaharaLabsAI/sahara-store"
 	"github.com/SaharaLabsAI/sahara-store/commitment"
@@ -33,8 +35,8 @@ const (
 type Options struct {
 	SCType            SCType               `mapstructure:"sc-type" toml:"sc-type" comment:"State commitment database type. Currently we support: \"iavl\" and \"iavl2\""`
 	SCPruningOption   *store.PruningOption `mapstructure:"sc-pruning-option" toml:"sc-pruning-option" comment:"Pruning options for state commitment"`
-	IavlV2Config      iavl_v2.TreeOptions
-	StoreDBOptions    map[string]iavl_v2.SqliteDbOptions
+	IavlV2Config      iavl2.Options
+	StoreDBOptions    map[string]iavl2sql.Options
 	OptimizeDBOnStart bool
 	WarmCacheOnStart  bool
 }
@@ -111,7 +113,7 @@ func CreateRootStore(opts *FactoryOptions) (store.RootStore, error) {
 				opts.Options.IavlV2Config.MetricsProxy = metrics
 				dir := fmt.Sprintf("%s/data/iavl2/%s", opts.RootDir, key)
 
-				dbOpts := iavl_v2.SqliteDbOptions{Path: dir, Metrics: metrics, Logger: opts.Logger.With("module", "iavl2")}
+				dbOpts := iavl2sql.Options{Path: dir, Metrics: metrics, Logger: opts.Logger.With("module", "iavl2")}
 				storeDbOpts, exists := opts.Options.StoreDBOptions[key]
 				if exists {
 					storeDbOpts.Path = dir

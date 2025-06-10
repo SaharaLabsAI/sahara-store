@@ -9,7 +9,8 @@ import (
 
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	iavl_v2 "github.com/cosmos/iavl/v2"
+	iavl2sql "github.com/cosmos/iavl/v2/db/sqlite"
+	iavl2 "github.com/cosmos/iavl/v2/tree"
 
 	store "github.com/SaharaLabsAI/sahara-store"
 	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
@@ -18,7 +19,7 @@ import (
 	rootmulti "github.com/SaharaLabsAI/sahara-store/compatv1/rootmulti"
 )
 
-func DefaultIavl2Options() *iavl_v2.TreeOptions {
+func DefaultIavl2Options() *iavl2.Options {
 	opts := iavlv2.DefaultOptions()
 
 	return &opts
@@ -30,7 +31,7 @@ type SetupIAVL2Context struct {
 	Db                dbm.DB
 	AppDBBackend      dbm.BackendType
 	PruningOptions    pruningtypes.PruningOptions
-	IavlOptions       *iavl_v2.TreeOptions
+	IavlOptions       *iavl2.Options
 	OptimizeDBOnStart bool
 	WarmCacheOnStart  bool
 }
@@ -63,7 +64,7 @@ func setup(
 					ctx.PruningOptions.Interval,
 				),
 				IavlV2Config: iavlOpts,
-				StoreDBOptions: map[string]iavl_v2.SqliteDbOptions{
+				StoreDBOptions: map[string]iavl2sql.Options{
 					"acc": {
 						CacheSize: -4 * 1024 * 1024, // 4G
 					},

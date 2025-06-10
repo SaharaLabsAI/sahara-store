@@ -21,8 +21,6 @@ type CompatV1Tree interface {
 	VersionExists(uint64) bool
 	RecentUpdatedLeaves(version uint64, limit int) (corestore.Iterator, error)
 	WriteChangeSet() error
-	// TODO: refactor
-	DiscardImmutable() error
 }
 
 func (c *CommitStore) GetTree(storeKey string) (CompatV1Tree, error) {
@@ -39,7 +37,7 @@ func (c *CommitStore) GetTree(storeKey string) (CompatV1Tree, error) {
 	return tree, nil
 }
 
-func (c *CommitStore) GetImmutableTree(storeKey string, version uint64) (Tree, error) {
+func (c *CommitStore) GetImmutableTree(storeKey string, version uint64) (CompatV1Tree, error) {
 	tree, err := c.GetTree(storeKey)
 	if err != nil {
 		return nil, err

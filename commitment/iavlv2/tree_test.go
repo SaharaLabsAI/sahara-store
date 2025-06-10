@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cosmos/iavl/v2"
+	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
+	iavl "github.com/cosmos/iavl/v2/tree"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
@@ -26,7 +27,7 @@ func TestCommitterSuite(t *testing.T) {
 			multiTrees := make(map[string]commitment.CompatV1Tree)
 			mountTreeFn := func(storeKey string) (commitment.CompatV1Tree, error) {
 				path := fmt.Sprintf("%s/%s", dbDir, storeKey)
-				tree, err := NewTree(iavl.DefaultTreeOptions(), iavl.SqliteDbOptions{Path: path}, logger)
+				tree, err := NewTree(iavl.DefaultOptions(), iavlsql.Options{Path: path}, logger)
 				require.NoError(t, err)
 				return tree, nil
 			}

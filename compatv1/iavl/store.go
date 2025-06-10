@@ -15,7 +15,8 @@ import (
 	"cosmossdk.io/store/tracekv"
 	"cosmossdk.io/store/types"
 
-	iavl_v2 "github.com/cosmos/iavl/v2"
+	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
+	iavl2 "github.com/cosmos/iavl/v2/tree"
 
 	store "github.com/SaharaLabsAI/sahara-store"
 	commstore "github.com/SaharaLabsAI/sahara-store/commitment"
@@ -84,7 +85,7 @@ func StoreLRUCacheSize(size int) StoreOption {
 	}
 }
 
-func LoadStoreWithOpts(treeOpts iavl_v2.TreeOptions, dbOpts iavl_v2.SqliteDbOptions, log log.Logger, version int64, storeMetrics metrics.StoreMetrics) (*Store, error) {
+func LoadStoreWithOpts(treeOpts iavl2.Options, dbOpts iavlsql.Options, log log.Logger, version int64, storeMetrics metrics.StoreMetrics) (*Store, error) {
 	if storeMetrics == nil {
 		storeMetrics = metrics.NewNoOpMetrics()
 	}
@@ -398,7 +399,7 @@ func (s *Store) Query(req *types.RequestQuery) (res *types.ResponseQuery, err er
 		if err != nil {
 			panic(fmt.Sprintf("version exists in store but could not retrieve corresponding versioned tree in store, %s", err.Error()))
 		}
-		defer imTree.DiscardImmutable()
+		defer imTree.Close()
 
 		value, err := imTree.GetDirty(key)
 		if err != nil {
@@ -423,7 +424,7 @@ func (s *Store) Query(req *types.RequestQuery) (res *types.ResponseQuery, err er
 		if err != nil {
 			panic(fmt.Sprintf("version exists in store but could not retrieve corresponding versioned tree in store, %s", err.Error()))
 		}
-		defer imTree.DiscardImmutable()
+		defer imTree.Close()
 
 		iter, err := imTree.IteratorDirty(subspace, prefixEndBytes(subspace), true)
 		if err != nil {

@@ -5,7 +5,10 @@ import (
 
 	ics23 "github.com/cosmos/ics23/go"
 
-	"github.com/cosmos/iavl/v2"
+	iavlconst "github.com/cosmos/iavl/v2/common/constants"
+	iavlnodepool "github.com/cosmos/iavl/v2/common/pool/node"
+	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
+	iavl "github.com/cosmos/iavl/v2/tree"
 
 	store "github.com/SaharaLabsAI/sahara-store"
 	"github.com/SaharaLabsAI/sahara-store/commitment"
@@ -28,12 +31,12 @@ type Tree struct {
 }
 
 func NewTree(
-	treeOptions iavl.TreeOptions,
-	dbOptions iavl.SqliteDbOptions,
+	treeOptions iavl.Options,
+	dbOptions iavlsql.Options,
 	log log.Logger,
 ) (*Tree, error) {
-	pool := iavl.NewNodePool()
-	sql, err := iavl.NewSqliteDb(pool, dbOptions)
+	pool := iavlnodepool.NewNodePool()
+	sql, err := iavlsql.NewSqliteDb(dbOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +168,7 @@ func (t *Tree) Export(version uint64) (commitment.Exporter, error) {
 	if err := isHighBitSet(version); err != nil {
 		return nil, err
 	}
-	e, err := t.tree.ExportVersion(int64(version), iavl.PostOrder)
+	e, err := t.tree.ExportVersion(int64(version), iavlconst.PostOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -210,8 +213,8 @@ func isHighBitSet(version uint64) error {
 	return nil
 }
 
-func DefaultOptions() iavl.TreeOptions {
-	opts := iavl.DefaultTreeOptions()
+func DefaultOptions() iavl.Options {
+	opts := iavl.DefaultOptions()
 	opts.HeightFilter = 1
 	opts.EvictionDepth = 18
 	return opts

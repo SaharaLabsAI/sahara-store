@@ -8,7 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/cosmos/iavl/v2"
+	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
+	iavl "github.com/cosmos/iavl/v2/tree"
 
 	store "github.com/SaharaLabsAI/sahara-store"
 	"github.com/SaharaLabsAI/sahara-store/commitment"
@@ -40,7 +41,7 @@ func (s *PruningManagerTestSuite) SetupTest() {
 	multiTrees := make(map[string]commitment.CompatV1Tree)
 	mountTreeFn := func(storeKey string) (commitment.CompatV1Tree, error) {
 		path := fmt.Sprintf("%s/%s", s.T().TempDir(), storeKey)
-		tree, err := iavlv2.NewTree(iavl.DefaultTreeOptions(), iavl.SqliteDbOptions{Path: path}, coretesting.NewNopLogger())
+		tree, err := iavlv2.NewTree(iavl.DefaultOptions(), iavlsql.Options{Path: path}, coretesting.NewNopLogger())
 		require.NoError(s.T(), err)
 		return tree, nil
 	}

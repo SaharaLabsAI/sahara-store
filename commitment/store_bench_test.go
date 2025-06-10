@@ -7,7 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/iavl/v2"
+	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
+	iavl "github.com/cosmos/iavl/v2/tree"
 
 	"github.com/SaharaLabsAI/sahara-store/commitment"
 	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
@@ -60,7 +61,7 @@ func getCommitStore(b *testing.B, db corestore.KVStoreWithBatch) *commitment.Com
 	multiTrees := make(map[string]commitment.CompatV1Tree)
 	mountTreeFn := func(storeKey string) (commitment.CompatV1Tree, error) {
 		path := fmt.Sprintf("%s/%s", b.TempDir(), storeKey)
-		tree, err := iavlv2.NewTree(iavl.DefaultTreeOptions(), iavl.SqliteDbOptions{Path: path}, coretesting.NewNopLogger())
+		tree, err := iavlv2.NewTree(iavl.DefaultOptions(), iavlsql.Options{Path: path}, coretesting.NewNopLogger())
 		require.NoError(b, err)
 		return tree, nil
 	}

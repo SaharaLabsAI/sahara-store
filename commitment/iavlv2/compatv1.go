@@ -48,18 +48,11 @@ func (t *Tree) GetImmutable(version uint64) (commitment.CompatV1Tree, error) {
 		return nil, err
 	}
 
-	return &Tree{
+	return &ImmutableTree{
 		tree: imTree,
 		log:  t.log,
 		path: t.path,
 	}, nil
-}
-
-func (t *Tree) DiscardImmutable() error {
-	if !t.tree.IsImmutable() {
-		return nil
-	}
-	return t.tree.DiscardImmutableTree()
 }
 
 func (t *Tree) SaveVersion() ([]byte, int64, error) {
