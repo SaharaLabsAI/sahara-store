@@ -3,8 +3,8 @@ package coretesting
 import (
 	"context"
 
-	"github.com/SaharaLabsAI/sahara-store/core/event"
-	"github.com/SaharaLabsAI/sahara-store/core/transaction"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/event"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/transaction"
 )
 
 var _ event.Service = &TestEventService{}

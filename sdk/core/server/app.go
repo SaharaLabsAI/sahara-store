@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	appmodulev2 "github.com/SaharaLabsAI/sahara-store/core/appmodule/v2"
-	"github.com/SaharaLabsAI/sahara-store/core/event"
-	"github.com/SaharaLabsAI/sahara-store/core/transaction"
+	appmodulev2 "github.com/SaharaLabsAI/sahara-store/sdk/core/appmodule/v2"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/event"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/transaction"
 )
 
 // BlockRequest defines the request structure for a block coming from consensus server to the state transition function.

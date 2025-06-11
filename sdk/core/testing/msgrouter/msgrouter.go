@@ -6,8 +6,8 @@ import (
 
 	gogoproto "github.com/cosmos/gogoproto/proto"
 
-	"github.com/SaharaLabsAI/sahara-store/core/router"
-	"github.com/SaharaLabsAI/sahara-store/core/transaction"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/router"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/transaction"
 )
 
 // msgTypeURL returns the TypeURL of a proto message.

@@ -1,4 +1,4 @@
-module github.com/SaharaLabsAI/sahara-store/core
+module github.com/SaharaLabsAI/sahara-store/sdk/core
 
 // Core is meant to have only a dependency on cosmossdk.io/schema, so we can use it as a dependency
 // in other modules without having to worry about circular dependencies.

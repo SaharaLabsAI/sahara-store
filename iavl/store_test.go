@@ -14,10 +14,10 @@ import (
 	iavl2sql "github.com/cosmos/iavl/v2/db/sqlite"
 	iavl2 "github.com/cosmos/iavl/v2/tree"
 
-	commiavl "github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
-	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
+	commiavl "github.com/SaharaLabsAI/sahara-store/sdk/commitment/iavlv2"
+	coretesting "github.com/SaharaLabsAI/sahara-store/sdk/core/testing"
 
-	"github.com/SaharaLabsAI/sahara-store/compatv1/kv"
+	"github.com/SaharaLabsAI/sahara-store/kv"
 )
 
 var (

@@ -3,8 +3,8 @@ package appmodule
 import (
 	"context"
 
-	appmodulev2 "github.com/SaharaLabsAI/sahara-store/core/appmodule/v2"
-	"github.com/SaharaLabsAI/sahara-store/core/registry"
+	appmodulev2 "github.com/SaharaLabsAI/sahara-store/sdk/core/appmodule/v2"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/registry"
 )
 
 // AppModule is a tag interface for app module implementations to use as a basis

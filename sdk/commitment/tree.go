@@ -6,8 +6,8 @@ import (
 
 	ics23 "github.com/cosmos/ics23/go"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	snapshotstypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	snapshotstypes "github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 )
 
 // ErrorExportDone is returned by Exporter.Next() when all items have been exported.

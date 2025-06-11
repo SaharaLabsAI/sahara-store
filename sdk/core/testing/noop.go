@@ -1,6 +1,6 @@
 package coretesting
 
-import "github.com/SaharaLabsAI/sahara-store/core/log"
+import "github.com/SaharaLabsAI/sahara-store/sdk/core/log"
 
 // NewNopLogger returns a new logger that does nothing.
 func NewNopLogger() log.Logger {

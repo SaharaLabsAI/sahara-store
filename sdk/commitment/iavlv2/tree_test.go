@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/SaharaLabsAI/sahara-store/commitment"
-	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store/metrics"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
+	corelog "github.com/SaharaLabsAI/sahara-store/sdk/core/log"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/metrics"
 )
 
 func TestCommitterSuite(t *testing.T) {

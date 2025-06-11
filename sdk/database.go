@@ -3,8 +3,8 @@ package store
 import (
 	"io"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store/proof"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/proof"
 )
 
 type VersionedReader interface {

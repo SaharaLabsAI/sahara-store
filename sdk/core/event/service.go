@@ -4,7 +4,7 @@ package event
 import (
 	"context"
 
-	"github.com/SaharaLabsAI/sahara-store/core/transaction"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/transaction"
 )
 
 // Service represents an event service which can retrieve and set an event manager in a context.

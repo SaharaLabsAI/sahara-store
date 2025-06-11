@@ -12,14 +12,14 @@ import (
 	iavl2sql "github.com/cosmos/iavl/v2/db/sqlite"
 	iavl2 "github.com/cosmos/iavl/v2/tree"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	"github.com/SaharaLabsAI/sahara-store/commitment"
-	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment/iavlv2"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store/internal"
-	"github.com/SaharaLabsAI/sahara-store/metrics"
-	"github.com/SaharaLabsAI/sahara-store/pruning"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/internal"
+	"github.com/SaharaLabsAI/sahara-store/sdk/metrics"
+	"github.com/SaharaLabsAI/sahara-store/sdk/pruning"
 )
 
 type (
@@ -33,8 +33,8 @@ const (
 
 // Options are the options for creating a root store.
 type Options struct {
-	SCType            SCType               `mapstructure:"sc-type" toml:"sc-type" comment:"State commitment database type. Currently we support: \"iavl\" and \"iavl2\""`
-	SCPruningOption   *store.PruningOption `mapstructure:"sc-pruning-option" toml:"sc-pruning-option" comment:"Pruning options for state commitment"`
+	SCType            SCType                  `mapstructure:"sc-type" toml:"sc-type" comment:"State commitment database type. Currently we support: \"iavl\" and \"iavl2\""`
+	SCPruningOption   *sdkstore.PruningOption `mapstructure:"sc-pruning-option" toml:"sc-pruning-option" comment:"Pruning options for state commitment"`
 	IavlV2Config      iavl2.Options
 	StoreDBOptions    map[string]iavl2sql.Options
 	OptimizeDBOnStart bool
@@ -55,7 +55,7 @@ type FactoryOptions struct {
 func DefaultStoreOptions() Options {
 	return Options{
 		SCType: SCTypeIavlV2,
-		SCPruningOption: &store.PruningOption{
+		SCPruningOption: &sdkstore.PruningOption{
 			KeepRecent: 2,
 			Interval:   100,
 		},
@@ -68,7 +68,7 @@ func DefaultStoreOptions() Options {
 // provided FactoryOptions. Strictly speaking app developers can create the root
 // store directly by calling root.New, so this function is not
 // necessary, but demonstrates the required steps and configuration to create a root store.
-func CreateRootStore(opts *FactoryOptions) (store.RootStore, error) {
+func CreateRootStore(opts *FactoryOptions) (sdkstore.RootStore, error) {
 	var (
 		sc  *commitment.CommitStore
 		err error
@@ -133,7 +133,7 @@ func CreateRootStore(opts *FactoryOptions) (store.RootStore, error) {
 	}
 
 	eg := new(errgroup.Group)
-	eg.SetLimit(store.MaxWriteParallelism)
+	eg.SetLimit(sdkstore.MaxWriteParallelism)
 
 	var lock sync.Mutex
 

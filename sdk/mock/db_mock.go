@@ -12,8 +12,8 @@ package mock
 import (
 	reflect "reflect"
 
-	store "github.com/SaharaLabsAI/sahara-store/core/store"
-	proof "github.com/SaharaLabsAI/sahara-store/proof"
+	store "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	proof "github.com/SaharaLabsAI/sahara-store/sdk/proof"
 	gomock "go.uber.org/mock/gomock"
 )
 

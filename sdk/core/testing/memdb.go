@@ -8,7 +8,7 @@ import (
 
 	"github.com/tidwall/btree"
 
-	"github.com/SaharaLabsAI/sahara-store/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 const (

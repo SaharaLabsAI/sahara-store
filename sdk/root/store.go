@@ -8,20 +8,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SaharaLabsAI/sahara-store/commitment"
-	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
+	corelog "github.com/SaharaLabsAI/sahara-store/sdk/core/log"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	"github.com/SaharaLabsAI/sahara-store/metrics"
-	"github.com/SaharaLabsAI/sahara-store/migration"
-	"github.com/SaharaLabsAI/sahara-store/proof"
-	"github.com/SaharaLabsAI/sahara-store/pruning"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	"github.com/SaharaLabsAI/sahara-store/sdk/metrics"
+	"github.com/SaharaLabsAI/sahara-store/sdk/migration"
+	"github.com/SaharaLabsAI/sahara-store/sdk/proof"
+	"github.com/SaharaLabsAI/sahara-store/sdk/pruning"
 )
 
 var (
-	_ store.RootStore        = (*Store)(nil)
-	_ store.UpgradeableStore = (*Store)(nil)
+	_ sdkstore.RootStore        = (*Store)(nil)
+	_ sdkstore.UpgradeableStore = (*Store)(nil)
 )
 
 // Store defines the SDK's default RootStore implementation. It contains a single
@@ -35,7 +35,7 @@ type Store struct {
 	dbCloser io.Closer
 
 	// stateCommitment reflects the state commitment (SC) backend
-	stateCommitment store.Committer
+	stateCommitment sdkstore.Committer
 
 	// lastCommitInfo reflects the last version/hash that has been committed
 	lastCommitInfo *proof.CommitInfo
@@ -66,11 +66,11 @@ type Store struct {
 func New(
 	dbCloser io.Closer,
 	logger corelog.Logger,
-	sc store.Committer,
+	sc sdkstore.Committer,
 	pm *pruning.Manager,
 	mm *migration.Manager,
 	m metrics.StoreMetrics,
-) (store.RootStore, error) {
+) (sdkstore.RootStore, error) {
 	return &Store{
 		dbCloser:         dbCloser,
 		logger:           logger,
@@ -100,7 +100,7 @@ func (s *Store) SetInitialVersion(v uint64) error {
 // If not, it checks if the state commitment implements the VersionedReader interface
 // and the version exists in the state commitment, since the state storage will be
 // synced during migration.
-func (s *Store) getVersionedReader(version uint64) (store.VersionedReader, error) {
+func (s *Store) getVersionedReader(version uint64) (sdkstore.VersionedReader, error) {
 	isExist, err := s.stateCommitment.VersionExists(version)
 	if err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func (s *Store) StateLatest() (uint64, corestore.ReaderMap, error) {
 	return v, NewReaderMap(v, vReader), nil
 }
 
-func (s *Store) GetStateCommitment() store.Committer {
+func (s *Store) GetStateCommitment() sdkstore.Committer {
 	return s.stateCommitment
 }
 
@@ -176,17 +176,17 @@ func (s *Store) GetLatestVersion() (uint64, error) {
 	return lastCommitID.Version, nil
 }
 
-func (s *Store) Query(storeKey []byte, version uint64, key []byte, prove bool) (store.QueryResult, error) {
+func (s *Store) Query(storeKey []byte, version uint64, key []byte, prove bool) (sdkstore.QueryResult, error) {
 	if s.telemetry != nil {
 		defer s.telemetry.MeasureSince(time.Now(), "root_store", "query")
 	}
 
 	val, err := s.stateCommitment.Get(storeKey, version, key)
 	if err != nil {
-		return store.QueryResult{}, fmt.Errorf("failed to query SC store: %w", err)
+		return sdkstore.QueryResult{}, fmt.Errorf("failed to query SC store: %w", err)
 	}
 
-	result := store.QueryResult{
+	result := sdkstore.QueryResult{
 		Key:     key,
 		Value:   val,
 		Version: version,
@@ -195,7 +195,7 @@ func (s *Store) Query(storeKey []byte, version uint64, key []byte, prove bool) (
 	if prove {
 		result.ProofOps, err = s.stateCommitment.GetProof(storeKey, version, key)
 		if err != nil {
-			return store.QueryResult{}, fmt.Errorf("failed to get SC store proof: %w", err)
+			return sdkstore.QueryResult{}, fmt.Errorf("failed to get SC store proof: %w", err)
 		}
 	}
 
@@ -397,11 +397,11 @@ func (s *Store) Prune(version uint64) error {
 	return s.pruningManager.Prune(version)
 }
 
-func (s *Store) GetPruningOption() *store.PruningOption {
+func (s *Store) GetPruningOption() *sdkstore.PruningOption {
 	return s.pruningManager.GetPruningOption()
 }
 
-func (s *Store) SetPruningOption(opt store.PruningOption) {
+func (s *Store) SetPruningOption(opt sdkstore.PruningOption) {
 	s.pruningManager.SetPruningOption(opt)
 }
 

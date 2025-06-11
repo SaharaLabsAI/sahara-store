@@ -6,7 +6,7 @@ import (
 	"cosmossdk.io/log"
 	"github.com/stretchr/testify/require"
 
-	"github.com/SaharaLabsAI/sahara-store/db"
+	"github.com/SaharaLabsAI/sahara-store/sdk/db"
 )
 
 var storeKeys = []string{"store1", "store2", "store3"}

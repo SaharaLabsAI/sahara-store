@@ -10,16 +10,16 @@ import (
 	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
 	iavl "github.com/cosmos/iavl/v2/tree"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	"github.com/SaharaLabsAI/sahara-store/commitment"
-	"github.com/SaharaLabsAI/sahara-store/core/log"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/log"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 var (
-	_ commitment.Tree      = (*Tree)(nil)
-	_ commitment.Reader    = (*Tree)(nil)
-	_ store.PausablePruner = (*Tree)(nil)
+	_ commitment.Tree         = (*Tree)(nil)
+	_ commitment.Reader       = (*Tree)(nil)
+	_ sdkstore.PausablePruner = (*Tree)(nil)
 )
 
 type Tree struct {

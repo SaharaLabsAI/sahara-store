@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/SaharaLabsAI/sahara-store/internal/encoding"
+	"github.com/SaharaLabsAI/sahara-store/sdk/internal/encoding"
 )
 
 type (

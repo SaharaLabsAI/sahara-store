@@ -3,7 +3,7 @@ package router
 import (
 	"context"
 
-	"github.com/SaharaLabsAI/sahara-store/core/transaction"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/transaction"
 )
 
 // Service is the interface that wraps the basic methods for a router.

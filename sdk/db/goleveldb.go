@@ -14,9 +14,9 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
 
-	coreserver "github.com/SaharaLabsAI/sahara-store/core/server"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	storeerrors "github.com/SaharaLabsAI/sahara-store/errors"
+	coreserver "github.com/SaharaLabsAI/sahara-store/sdk/core/server"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	storeerrors "github.com/SaharaLabsAI/sahara-store/sdk/errors"
 )
 
 var _ corestore.KVStoreWithBatch = (*GoLevelDB)(nil)

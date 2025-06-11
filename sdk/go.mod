@@ -1,20 +1,20 @@
-module github.com/SaharaLabsAI/sahara-store
+module github.com/SaharaLabsAI/sahara-store/sdk
 
 go 1.23.1
 
 toolchain go1.23.5
 
 replace (
-	github.com/SaharaLabsAI/sahara-store/core => ./core
-	github.com/SaharaLabsAI/sahara-store/core/testing => ./core/testing
+	github.com/SaharaLabsAI/sahara-store/sdk/core => ./core
+	github.com/SaharaLabsAI/sahara-store/sdk/core/testing => ./core/testing
 	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.2.0-beta
 )
 
 require (
 	cosmossdk.io/errors/v2 v2.0.0
 	cosmossdk.io/log v1.5.0
-	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250528091029-801b0e19f9b9
-	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250528091029-801b0e19f9b9
+	github.com/SaharaLabsAI/sahara-store/sdk/core v0.0.0-20250528091029-801b0e19f9b9
+	github.com/SaharaLabsAI/sahara-store/sdk/core/testing v0.0.0-20250528091029-801b0e19f9b9
 	github.com/cockroachdb/pebble v1.1.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/gogoproto v1.7.0

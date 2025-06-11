@@ -1,19 +1,19 @@
 package pruning
 
 import (
-	store "github.com/SaharaLabsAI/sahara-store"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
 )
 
 // Manager is a struct that manages the pruning of old versions of the SC and SS.
 type Manager struct {
 	// scPruner is the pruner for the SC.
-	scPruner store.Pruner
+	scPruner sdkstore.Pruner
 	// scPruningOption are the pruning options for the SC.
-	scPruningOption *store.PruningOption
+	scPruningOption *sdkstore.PruningOption
 }
 
 // NewManager creates a new Pruning Manager.
-func NewManager(scPruner store.Pruner, scPruningOption *store.PruningOption) *Manager {
+func NewManager(scPruner sdkstore.Pruner, scPruningOption *sdkstore.PruningOption) *Manager {
 	return &Manager{
 		scPruner:        scPruner,
 		scPruningOption: scPruningOption,
@@ -37,7 +37,7 @@ func (m *Manager) Prune(version uint64) error {
 }
 
 func (m *Manager) signalPruning(pause bool) {
-	if scPausablePruner, ok := m.scPruner.(store.PausablePruner); ok {
+	if scPausablePruner, ok := m.scPruner.(sdkstore.PausablePruner); ok {
 		scPausablePruner.PausePruning(pause)
 	}
 }
@@ -51,11 +51,11 @@ func (m *Manager) ResumePruning(version uint64) error {
 	return m.Prune(version)
 }
 
-func (m *Manager) GetPruningOption() *store.PruningOption {
+func (m *Manager) GetPruningOption() *sdkstore.PruningOption {
 	return m.scPruningOption
 }
 
-func (m *Manager) SetPruningOption(opt store.PruningOption) {
+func (m *Manager) SetPruningOption(opt sdkstore.PruningOption) {
 	m.scPruningOption.KeepRecent = opt.KeepRecent
 	m.scPruningOption.Interval = opt.Interval
 }

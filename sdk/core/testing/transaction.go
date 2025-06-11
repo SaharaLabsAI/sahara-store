@@ -3,7 +3,7 @@ package coretesting
 import (
 	"context"
 
-	"github.com/SaharaLabsAI/sahara-store/core/transaction"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/transaction"
 )
 
 var _ transaction.Service = &TestTransactionService{}

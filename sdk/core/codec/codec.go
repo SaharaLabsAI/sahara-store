@@ -1,6 +1,6 @@
 package codec
 
-import "github.com/SaharaLabsAI/sahara-store/core/transaction"
+import "github.com/SaharaLabsAI/sahara-store/sdk/core/transaction"
 
 // Codec defines a Binary Codec and JSON Codec for modules to encode and decode data.
 type Codec interface {

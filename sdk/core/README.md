@@ -1,6 +1,6 @@
 # Cosmos SDK Core
 
-The [github.com/SaharaLabsAI/sahara-store/core](https://pkg.go.dev/github.com/SaharaLabsAI/sahara-store/core) Go module defines essential APIs and interfaces for the Cosmos SDK ecosystem. It serves as a foundation for building modular blockchain applications.
+The [github.com/SaharaLabsAI/sahara-store/sdk/core](https://pkg.go.dev/github.com/SaharaLabsAI/sahara-store/sdk/core) Go module defines essential APIs and interfaces for the Cosmos SDK ecosystem. It serves as a foundation for building modular blockchain applications.
 
 Key features and principles:
 
@@ -12,7 +12,7 @@ Key features and principles:
 6. Adheres to a no-breaking-changes policy for reliable dependency management.
 7. Aimed to only depend on `schema`, ensuring a lightweight and self-contained foundation.
 
-The core module offers the [appmodule](https://pkg.go.dev/github.com/SaharaLabsAI/sahara-store/core/appmodule) and [appmodule/v2](https://pkg.go.dev/github.com/SaharaLabsAI/sahara-store/core/appmodule/v2) packages that include APIs to describe how modules can be written.
+The core module offers the [appmodule](https://pkg.go.dev/github.com/SaharaLabsAI/sahara-store/sdk/core/appmodule) and [appmodule/v2](https://pkg.go.dev/github.com/SaharaLabsAI/sahara-store/sdk/core/appmodule/v2) packages that include APIs to describe how modules can be written.
 Additionally, it contains all core services APIs that can be used in modules to interact with the SDK, majoritarily via the `appmodule.Environment` struct.
 Last but not least, it provides codecs and packages for the Cosmos SDK's core types (think of, for instance, logger, store interface or an address codec).
 

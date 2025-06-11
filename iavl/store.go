@@ -18,13 +18,13 @@ import (
 	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
 	iavl2 "github.com/cosmos/iavl/v2/tree"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	commstore "github.com/SaharaLabsAI/sahara-store/commitment"
-	commiavl "github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
-	"github.com/SaharaLabsAI/sahara-store/core/log"
-	"github.com/SaharaLabsAI/sahara-store/proof"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	commstore "github.com/SaharaLabsAI/sahara-store/sdk/commitment"
+	commiavl "github.com/SaharaLabsAI/sahara-store/sdk/commitment/iavlv2"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/log"
+	"github.com/SaharaLabsAI/sahara-store/sdk/proof"
 
-	"github.com/SaharaLabsAI/sahara-store/compatv1/kv"
+	"github.com/SaharaLabsAI/sahara-store/kv"
 )
 
 var (
@@ -48,7 +48,7 @@ type Store struct {
 type StoreOption func(*Store) error
 
 // LoadStore from given root store, the tree version is
-func LoadStore(root store.RootStore, storeKey types.StoreKey, storeMetrics metrics.StoreMetrics, opts ...StoreOption) *Store {
+func LoadStore(root sdkstore.RootStore, storeKey types.StoreKey, storeMetrics metrics.StoreMetrics, opts ...StoreOption) *Store {
 	if storeMetrics == nil {
 		storeMetrics = metrics.NewNoOpMetrics()
 	}

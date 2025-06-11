@@ -12,27 +12,27 @@ import (
 	protoio "github.com/cosmos/gogoproto/io"
 	"golang.org/x/sync/errgroup"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store/internal"
-	"github.com/SaharaLabsAI/sahara-store/internal/conv"
-	"github.com/SaharaLabsAI/sahara-store/metrics"
-	"github.com/SaharaLabsAI/sahara-store/proof"
-	"github.com/SaharaLabsAI/sahara-store/snapshots"
-	snapshotstypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	corelog "github.com/SaharaLabsAI/sahara-store/sdk/core/log"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/internal"
+	"github.com/SaharaLabsAI/sahara-store/sdk/internal/conv"
+	"github.com/SaharaLabsAI/sahara-store/sdk/metrics"
+	"github.com/SaharaLabsAI/sahara-store/sdk/proof"
+	"github.com/SaharaLabsAI/sahara-store/sdk/snapshots"
+	snapshotstypes "github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 )
 
 var (
-	_ store.Committer             = (*CommitStore)(nil)
-	_ store.UpgradeableStore      = (*CommitStore)(nil)
+	_ sdkstore.Committer          = (*CommitStore)(nil)
+	_ sdkstore.UpgradeableStore   = (*CommitStore)(nil)
 	_ snapshots.CommitSnapshotter = (*CommitStore)(nil)
-	_ store.PausablePruner        = (*CommitStore)(nil)
+	_ sdkstore.PausablePruner     = (*CommitStore)(nil)
 
 	// NOTE: It is not recommended to use the CommitStore as a reader. This is only used
 	// during the migration process. Generally, the SC layer does not provide a reader
 	// in the store/v2.
-	_ store.VersionedReader = (*CommitStore)(nil)
+	_ sdkstore.VersionedReader = (*CommitStore)(nil)
 )
 
 // MountTreeFn is a function that mounts a tree given a store key.
@@ -79,7 +79,7 @@ func (c *CommitStore) WriteChangeset(cs *corestore.Changeset) error {
 		}()
 	}
 	eg := new(errgroup.Group)
-	eg.SetLimit(store.MaxWriteParallelism)
+	eg.SetLimit(sdkstore.MaxWriteParallelism)
 	for _, pairs := range cs.Changes {
 		key := conv.UnsafeBytesToStr(pairs.Actor)
 		c.logger.Error("write store change set", "store", key, "change len", len(pairs.StateChanges))
@@ -204,7 +204,7 @@ func (c *CommitStore) loadVersion(targetVersion uint64, storeKeys []string, over
 	}
 
 	eg := errgroup.Group{}
-	eg.SetLimit(store.MaxWriteParallelism)
+	eg.SetLimit(sdkstore.MaxWriteParallelism)
 	for _, storeKey := range storeKeys {
 		tree := c.multiTrees[storeKey]
 		if overrideAfter {
@@ -255,7 +255,7 @@ func (c *CommitStore) Commit(version uint64) (*proof.CommitInfo, error) {
 	}
 	storeInfos := make([]*proof.StoreInfo, 0, len(c.multiTrees))
 	eg := new(errgroup.Group)
-	eg.SetLimit(store.MaxWriteParallelism)
+	eg.SetLimit(sdkstore.MaxWriteParallelism)
 
 	for storeKey, tree := range c.multiTrees {
 		if internal.IsMemoryStoreKey(storeKey) {
@@ -446,7 +446,7 @@ func (c *CommitStore) Prune(version uint64) error {
 
 	// prune the trees
 	eg := new(errgroup.Group)
-	eg.SetLimit(store.MaxWriteParallelism)
+	eg.SetLimit(sdkstore.MaxWriteParallelism)
 	for _, tree := range c.multiTrees {
 		if tree.IsConcurrentSafe() {
 			eg.Go(func() error {
@@ -485,7 +485,7 @@ func (c *CommitStore) pruneRemovedStoreKeys(version uint64) error {
 // PausePruning implements store.PausablePruner.
 func (c *CommitStore) PausePruning(pause bool) {
 	for _, tree := range c.multiTrees {
-		if pruner, ok := tree.(store.PausablePruner); ok {
+		if pruner, ok := tree.(sdkstore.PausablePruner); ok {
 			pruner.PausePruning(pause)
 		}
 	}

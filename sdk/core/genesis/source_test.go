@@ -5,7 +5,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/SaharaLabsAI/sahara-store/core/appmodule"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/appmodule"
 )
 
 func TestSource(t *testing.T) {

@@ -3,8 +3,8 @@ package commitment
 import (
 	"fmt"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store/metrics"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/metrics"
 )
 
 type CompatV1Tree interface {

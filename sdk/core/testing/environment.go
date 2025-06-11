@@ -3,11 +3,11 @@ package coretesting
 import (
 	"context"
 
-	appmodulev2 "github.com/SaharaLabsAI/sahara-store/core/appmodule/v2"
-	corecontext "github.com/SaharaLabsAI/sahara-store/core/context"
-	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
-	"github.com/SaharaLabsAI/sahara-store/core/router"
-	"github.com/SaharaLabsAI/sahara-store/core/store"
+	appmodulev2 "github.com/SaharaLabsAI/sahara-store/sdk/core/appmodule/v2"
+	corecontext "github.com/SaharaLabsAI/sahara-store/sdk/core/context"
+	corelog "github.com/SaharaLabsAI/sahara-store/sdk/core/log"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/router"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 type TestEnvironmentConfig struct {

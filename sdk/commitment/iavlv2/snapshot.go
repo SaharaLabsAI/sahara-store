@@ -5,8 +5,8 @@ import (
 
 	iavl "github.com/cosmos/iavl/v2/tree"
 
-	"github.com/SaharaLabsAI/sahara-store/commitment"
-	snapshotstypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
+	snapshotstypes "github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 )
 
 // Exporter is a wrapper around iavl.Exporter.

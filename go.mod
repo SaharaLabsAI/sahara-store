@@ -1,13 +1,13 @@
-module github.com/SaharaLabsAI/sahara-store/compatv1
+module github.com/SaharaLabsAI/sahara-store
 
 go 1.23.1
 
 toolchain go1.23.5
 
 replace (
-	github.com/SaharaLabsAI/sahara-store => ./sdkstore
-	github.com/SaharaLabsAI/sahara-store/core => ./sdkstore/core
-	github.com/SaharaLabsAI/sahara-store/core/testing => ./sdkstore/core/testing
+	github.com/SaharaLabsAI/sahara-store/sdk => ./sdk
+	github.com/SaharaLabsAI/sahara-store/sdk/core => ./sdk/core
+	github.com/SaharaLabsAI/sahara-store/sdk/core/testing => ./sdk/core/testing
 	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.2.0-beta
 )
 
@@ -15,9 +15,9 @@ require (
 	cosmossdk.io/errors v1.0.1
 	cosmossdk.io/log v1.5.0
 	cosmossdk.io/store v1.1.1
-	github.com/SaharaLabsAI/sahara-store v1.0.0-beta.7.0.20250529124827-ec2dc21bcc51
-	github.com/SaharaLabsAI/sahara-store/core v0.0.0-20250528091029-801b0e19f9b9
-	github.com/SaharaLabsAI/sahara-store/core/testing v0.0.0-20250528091029-801b0e19f9b9
+	github.com/SaharaLabsAI/sahara-store/sdk v1.0.0-beta.7.0.20250529124827-ec2dc21bcc51
+	github.com/SaharaLabsAI/sahara-store/sdk/core v0.0.0-20250528091029-801b0e19f9b9
+	github.com/SaharaLabsAI/sahara-store/sdk/core/testing v0.0.0-20250528091029-801b0e19f9b9
 	github.com/cometbft/cometbft v0.38.17
 	github.com/cosmos/cosmos-db v1.1.1
 	github.com/cosmos/cosmos-sdk v0.50.13

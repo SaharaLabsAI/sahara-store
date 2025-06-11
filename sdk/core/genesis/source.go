@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/SaharaLabsAI/sahara-store/core/appmodule"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/appmodule"
 )
 
 // SourceFromRawJSON returns a genesis source based on a raw JSON message.

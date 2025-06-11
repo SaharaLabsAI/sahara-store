@@ -1,13 +1,13 @@
 package mock
 
-import "github.com/SaharaLabsAI/sahara-store"
+import sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
 
 // StateCommitter is a mock of store.Committer
 type StateCommitter interface {
-	store.Committer
-	store.Pruner
-	store.PausablePruner
-	store.UpgradeableStore
-	store.VersionedReader
-	store.UpgradableDatabase
+	sdkstore.Committer
+	sdkstore.Pruner
+	sdkstore.PausablePruner
+	sdkstore.UpgradeableStore
+	sdkstore.VersionedReader
+	sdkstore.UpgradableDatabase
 }

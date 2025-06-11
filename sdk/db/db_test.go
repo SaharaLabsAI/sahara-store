@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 type DBTestSuite struct {

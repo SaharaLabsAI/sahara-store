@@ -8,14 +8,14 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	corelog "github.com/SaharaLabsAI/sahara-store/core/log"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
-	dbm "github.com/SaharaLabsAI/sahara-store/db"
-	"github.com/SaharaLabsAI/sahara-store/proof"
-	"github.com/SaharaLabsAI/sahara-store/snapshots"
-	snapshotstypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	corelog "github.com/SaharaLabsAI/sahara-store/sdk/core/log"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	coretesting "github.com/SaharaLabsAI/sahara-store/sdk/core/testing"
+	dbm "github.com/SaharaLabsAI/sahara-store/sdk/db"
+	"github.com/SaharaLabsAI/sahara-store/sdk/proof"
+	"github.com/SaharaLabsAI/sahara-store/sdk/snapshots"
+	snapshotstypes "github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 )
 
 const (
@@ -202,7 +202,7 @@ func (s *CommitStoreTestSuite) TestStore_LoadVersion() {
 
 func (s *CommitStoreTestSuite) TestStore_Pruning() {
 	storeKeys := []string{storeKey1, storeKey2}
-	pruneOpts := store.NewPruningOptionWithCustom(10, 5)
+	pruneOpts := sdkstore.NewPruningOptionWithCustom(10, 5)
 	commitStore, err := s.NewStore(dbm.NewMemDB(), s.T().TempDir(), storeKeys, nil, coretesting.NewNopLogger())
 	s.Require().NoError(err)
 

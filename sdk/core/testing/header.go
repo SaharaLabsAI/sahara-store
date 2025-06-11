@@ -3,7 +3,7 @@ package coretesting
 import (
 	"context"
 
-	"github.com/SaharaLabsAI/sahara-store/core/header"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/header"
 )
 
 var _ header.Service = &TestHeaderService{}

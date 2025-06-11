@@ -6,10 +6,10 @@ import (
 
 	"cosmossdk.io/log"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store/db"
-	"github.com/SaharaLabsAI/sahara-store/metrics"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/db"
+	"github.com/SaharaLabsAI/sahara-store/sdk/metrics"
 )
 
 // Builder is the interface for a store/v2 RootStore builder.
@@ -23,13 +23,13 @@ import (
 // was successful, but that's left up to the implementation.
 type Builder interface {
 	// Build creates a new store/v2 RootStore from the given Config.
-	Build(log.Logger, *Config) (store.RootStore, error)
+	Build(log.Logger, *Config) (sdkstore.RootStore, error)
 
-	BuildWithDB(logger log.Logger, scRawDb corestore.KVStoreWithBatch, config *Config) (store.RootStore, error)
+	BuildWithDB(logger log.Logger, scRawDb corestore.KVStoreWithBatch, config *Config) (sdkstore.RootStore, error)
 	// RegisterKey registers a store key (namespace) to be used when building the RootStore.
 	RegisterKey(string)
 	// Get returns the Store.  Build should be called before calling Get or the result will be nil.
-	Get() store.RootStore
+	Get() sdkstore.RootStore
 }
 
 var _ Builder = (*builder)(nil)
@@ -42,7 +42,7 @@ type builder struct {
 	storeKeys map[string]struct{}
 
 	// output
-	store store.RootStore
+	store sdkstore.RootStore
 }
 
 func NewBuilder() Builder {
@@ -53,7 +53,7 @@ func NewBuilder() Builder {
 func (sb *builder) Build(
 	logger log.Logger,
 	config *Config,
-) (store.RootStore, error) {
+) (sdkstore.RootStore, error) {
 	if sb.store != nil {
 		return sb.store, nil
 	}
@@ -78,7 +78,7 @@ func (sb *builder) Build(
 	return sb.BuildWithDB(logger, scRawDb, config)
 }
 
-func (sb *builder) BuildWithDB(logger log.Logger, scRawDb corestore.KVStoreWithBatch, config *Config) (store.RootStore, error) {
+func (sb *builder) BuildWithDB(logger log.Logger, scRawDb corestore.KVStoreWithBatch, config *Config) (sdkstore.RootStore, error) {
 	var storeKeys []string
 	for key := range sb.storeKeys {
 		storeKeys = append(storeKeys, key)
@@ -102,7 +102,7 @@ func (sb *builder) BuildWithDB(logger log.Logger, scRawDb corestore.KVStoreWithB
 	return sb.store, nil
 }
 
-func (sb *builder) Get() store.RootStore {
+func (sb *builder) Get() sdkstore.RootStore {
 	return sb.store
 }
 

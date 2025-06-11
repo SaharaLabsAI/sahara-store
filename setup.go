@@ -1,4 +1,4 @@
-package compatv1
+package store
 
 import (
 	"fmt"
@@ -12,11 +12,11 @@ import (
 	iavl2sql "github.com/cosmos/iavl/v2/db/sqlite"
 	iavl2 "github.com/cosmos/iavl/v2/tree"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
-	"github.com/SaharaLabsAI/sahara-store/root"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment/iavlv2"
+	"github.com/SaharaLabsAI/sahara-store/sdk/root"
 
-	rootmulti "github.com/SaharaLabsAI/sahara-store/compatv1/rootmulti"
+	rootmulti "github.com/SaharaLabsAI/sahara-store/rootmulti"
 )
 
 func DefaultIavl2Options() *iavl2.Options {
@@ -59,7 +59,7 @@ func setup(
 			AppDBBackend: string(ctx.AppDBBackend),
 			Options: root.Options{
 				SCType: root.SCTypeIavlV2,
-				SCPruningOption: store.NewPruningOptionWithCustom(
+				SCPruningOption: sdkstore.NewPruningOptionWithCustom(
 					ctx.PruningOptions.KeepRecent,
 					ctx.PruningOptions.Interval,
 				),

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 // encodedSize returns the size of the encoded Changeset.

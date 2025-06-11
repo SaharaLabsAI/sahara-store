@@ -3,9 +3,9 @@ package store
 import (
 	"io"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 
-	"github.com/SaharaLabsAI/sahara-store/proof"
+	"github.com/SaharaLabsAI/sahara-store/sdk/proof"
 )
 
 var MaxWriteParallelism = 16

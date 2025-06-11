@@ -17,12 +17,12 @@ import (
 	snapshottypes "cosmossdk.io/store/snapshots/types"
 	"cosmossdk.io/store/types"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
-	"github.com/SaharaLabsAI/sahara-store/root"
-	"github.com/SaharaLabsAI/sahara-store/snapshots"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment/iavlv2"
+	"github.com/SaharaLabsAI/sahara-store/sdk/root"
+	"github.com/SaharaLabsAI/sahara-store/sdk/snapshots"
 
-	compatiavl "github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
+	compatiavl "github.com/SaharaLabsAI/sahara-store/iavl"
 )
 
 func newMultiStoreWithGeneratedData(db dbm.DB, stores uint8, storeKeys uint64, home string) *Store {
@@ -40,7 +40,7 @@ func newMultiStoreWithGeneratedData(db dbm.DB, stores uint8, storeKeys uint64, h
 		AppDBBackend: "pebbledb",
 		Options: root.Options{
 			SCType: root.SCTypeIavlV2,
-			SCPruningOption: &store.PruningOption{
+			SCPruningOption: &sdkstore.PruningOption{
 				KeepRecent: 0,
 				Interval:   0,
 			},
@@ -105,7 +105,7 @@ func newMultiStoreWithMixedMounts(db dbm.DB, home string) *Store {
 		AppDBBackend: "pebbledb",
 		Options: root.Options{
 			SCType: root.SCTypeIavlV2,
-			SCPruningOption: &store.PruningOption{
+			SCPruningOption: &sdkstore.PruningOption{
 				KeepRecent: 0,
 				Interval:   0,
 			},
@@ -314,7 +314,7 @@ func benchmarkMultistoreSnapshot(b *testing.B, stores uint8, storeKeys uint64) {
 			AppDBBackend: "pebbledb",
 			Options: root.Options{
 				SCType: root.SCTypeIavlV2,
-				SCPruningOption: &store.PruningOption{
+				SCPruningOption: &sdkstore.PruningOption{
 					KeepRecent: 0,
 					Interval:   0,
 				},
@@ -376,7 +376,7 @@ func benchmarkMultistoreSnapshotRestore(b *testing.B, stores uint8, storeKeys ui
 			AppDBBackend: "pebbledb",
 			Options: root.Options{
 				SCType: root.SCTypeIavlV2,
-				SCPruningOption: &store.PruningOption{
+				SCPruningOption: &sdkstore.PruningOption{
 					KeepRecent: 0,
 					Interval:   0,
 				},

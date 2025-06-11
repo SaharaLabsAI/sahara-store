@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/SaharaLabsAI/sahara-store/snapshots"
-	"github.com/SaharaLabsAI/sahara-store/snapshots/types"
+	"github.com/SaharaLabsAI/sahara-store/sdk/snapshots"
+	"github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 )
 
 func setupStore(t *testing.T) *snapshots.Store {

@@ -7,18 +7,18 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	coretesting "github.com/SaharaLabsAI/sahara-store/sdk/core/testing"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	"github.com/SaharaLabsAI/sahara-store/metrics"
-	"github.com/SaharaLabsAI/sahara-store/mock"
-	"github.com/SaharaLabsAI/sahara-store/pruning"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	"github.com/SaharaLabsAI/sahara-store/sdk/metrics"
+	"github.com/SaharaLabsAI/sahara-store/sdk/mock"
+	"github.com/SaharaLabsAI/sahara-store/sdk/pruning"
 )
 
-func newTestRootStore(sc store.Committer) *Store {
+func newTestRootStore(sc sdkstore.Committer) *Store {
 	noopLog := coretesting.NewNopLogger()
-	pm := pruning.NewManager(sc.(store.Pruner), nil)
+	pm := pruning.NewManager(sc.(sdkstore.Pruner), nil)
 	return &Store{
 		logger:          noopLog,
 		telemetry:       &metrics.Metrics{},

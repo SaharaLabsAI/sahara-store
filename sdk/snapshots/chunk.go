@@ -6,8 +6,8 @@ import (
 	"io"
 	"math"
 
-	storeerrors "github.com/SaharaLabsAI/sahara-store/errors"
-	snapshotstypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
+	storeerrors "github.com/SaharaLabsAI/sahara-store/sdk/errors"
+	snapshotstypes "github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 )
 
 // ChunkWriter reads an input stream, splits it into fixed-size chunks, and writes them to a

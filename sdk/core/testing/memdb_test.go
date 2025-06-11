@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/SaharaLabsAI/sahara-store/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 func TestMemDB(t *testing.T) {

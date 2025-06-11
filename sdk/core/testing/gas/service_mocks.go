@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gas "github.com/SaharaLabsAI/sahara-store/core/gas"
+	gas "github.com/SaharaLabsAI/sahara-store/sdk/core/gas"
 	gomock "go.uber.org/mock/gomock"
 )
 

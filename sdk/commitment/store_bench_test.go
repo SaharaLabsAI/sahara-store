@@ -10,12 +10,12 @@ import (
 	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
 	iavl "github.com/cosmos/iavl/v2/tree"
 
-	"github.com/SaharaLabsAI/sahara-store/commitment"
-	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
-	dbm "github.com/SaharaLabsAI/sahara-store/db"
-	"github.com/SaharaLabsAI/sahara-store/metrics"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment/iavlv2"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	coretesting "github.com/SaharaLabsAI/sahara-store/sdk/core/testing"
+	dbm "github.com/SaharaLabsAI/sahara-store/sdk/db"
+	"github.com/SaharaLabsAI/sahara-store/sdk/metrics"
 )
 
 var (

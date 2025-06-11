@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store/errors"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/errors"
 )
 
 // PrefixDB wraps a namespace of another database as a logical database.

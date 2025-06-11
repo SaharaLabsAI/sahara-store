@@ -3,7 +3,7 @@ package coretesting
 import (
 	"context"
 
-	"github.com/SaharaLabsAI/sahara-store/core/gas"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/gas"
 )
 
 var _ gas.Service = &TestGasService{}

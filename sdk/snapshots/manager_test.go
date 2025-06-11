@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
-	"github.com/SaharaLabsAI/sahara-store/snapshots"
-	"github.com/SaharaLabsAI/sahara-store/snapshots/types"
+	coretesting "github.com/SaharaLabsAI/sahara-store/sdk/core/testing"
+	"github.com/SaharaLabsAI/sahara-store/sdk/snapshots"
+	"github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 )
 
 var opts = snapshots.NewSnapshotOptions(1500, 2)

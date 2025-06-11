@@ -1,7 +1,7 @@
 package appmodule
 
 import (
-	appmodulev2 "github.com/SaharaLabsAI/sahara-store/core/appmodule/v2"
+	appmodulev2 "github.com/SaharaLabsAI/sahara-store/sdk/core/appmodule/v2"
 )
 
 // Environment is used to get all services to their respective module.

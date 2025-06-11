@@ -3,8 +3,8 @@ package db
 import (
 	"fmt"
 
-	coreserver "github.com/SaharaLabsAI/sahara-store/core/server"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+	coreserver "github.com/SaharaLabsAI/sahara-store/sdk/core/server"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 type DBType string

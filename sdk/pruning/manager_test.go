@@ -11,13 +11,13 @@ import (
 	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
 	iavl "github.com/cosmos/iavl/v2/tree"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	"github.com/SaharaLabsAI/sahara-store/commitment"
-	"github.com/SaharaLabsAI/sahara-store/commitment/iavlv2"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
-	dbm "github.com/SaharaLabsAI/sahara-store/db"
-	"github.com/SaharaLabsAI/sahara-store/metrics"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment/iavlv2"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	coretesting "github.com/SaharaLabsAI/sahara-store/sdk/core/testing"
+	dbm "github.com/SaharaLabsAI/sahara-store/sdk/db"
+	"github.com/SaharaLabsAI/sahara-store/sdk/metrics"
 )
 
 var storeKeys = []string{"store1", "store2", "store3"}
@@ -51,7 +51,7 @@ func (s *PruningManagerTestSuite) SetupTest() {
 	s.sc, err = commitment.NewCommitStore(multiTrees, nil, mdb, nopLog, metrics.NewNoOpMetrics())
 	s.Require().NoError(err)
 
-	scPruningOption := store.NewPruningOptionWithCustom(0, 1) // prune all
+	scPruningOption := sdkstore.NewPruningOptionWithCustom(0, 1) // prune all
 	s.manager = NewManager(s.sc, scPruningOption)
 }
 
@@ -91,35 +91,35 @@ func (s *PruningManagerTestSuite) TestPrune() {
 func TestPruningOption(t *testing.T) {
 	testCases := []struct {
 		name         string
-		options      *store.PruningOption
+		options      *sdkstore.PruningOption
 		version      uint64
 		pruning      bool
 		pruneVersion uint64
 	}{
 		{
 			name:         "no pruning",
-			options:      store.NewPruningOptionWithCustom(100, 0),
+			options:      sdkstore.NewPruningOptionWithCustom(100, 0),
 			version:      100,
 			pruning:      false,
 			pruneVersion: 0,
 		},
 		{
 			name:         "prune all",
-			options:      store.NewPruningOptionWithCustom(0, 1),
+			options:      sdkstore.NewPruningOptionWithCustom(0, 1),
 			version:      19,
 			pruning:      true,
 			pruneVersion: 18,
 		},
 		{
 			name:         "prune none",
-			options:      store.NewPruningOptionWithCustom(100, 10),
+			options:      sdkstore.NewPruningOptionWithCustom(100, 10),
 			version:      19,
 			pruning:      false,
 			pruneVersion: 0,
 		},
 		{
 			name:         "prune some",
-			options:      store.NewPruningOptionWithCustom(10, 50),
+			options:      sdkstore.NewPruningOptionWithCustom(10, 50),
 			version:      100,
 			pruning:      true,
 			pruneVersion: 89,

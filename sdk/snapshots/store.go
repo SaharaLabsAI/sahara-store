@@ -16,12 +16,12 @@ import (
 
 	"github.com/cosmos/gogoproto/proto"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 
 	"cosmossdk.io/errors/v2"
 
-	storeerrors "github.com/SaharaLabsAI/sahara-store/errors"
-	"github.com/SaharaLabsAI/sahara-store/snapshots/types"
+	storeerrors "github.com/SaharaLabsAI/sahara-store/sdk/errors"
+	"github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 )
 
 const (

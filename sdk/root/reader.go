@@ -1,8 +1,8 @@
 package root
 
 import (
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 var (
@@ -14,11 +14,11 @@ var (
 // operations. This is useful for exposing a read-only view of the RootStore at
 // a specific version in history, which could also be the latest state.
 type ReaderMap struct {
-	vReader store.VersionedReader
+	vReader sdkstore.VersionedReader
 	version uint64
 }
 
-func NewReaderMap(v uint64, vr store.VersionedReader) *ReaderMap {
+func NewReaderMap(v uint64, vr sdkstore.VersionedReader) *ReaderMap {
 	return &ReaderMap{
 		vReader: vr,
 		version: v,
@@ -31,12 +31,12 @@ func (rm *ReaderMap) GetReader(actor []byte) (corestore.Reader, error) {
 
 // Reader represents a read-only adapter for accessing data from the root store.
 type Reader struct {
-	version uint64                // The version of the data.
-	vReader store.VersionedReader // The root store to read data from.
-	actor   []byte                // The actor associated with the data.
+	version uint64                   // The version of the data.
+	vReader sdkstore.VersionedReader // The root store to read data from.
+	actor   []byte                   // The actor associated with the data.
 }
 
-func NewReader(v uint64, vr store.VersionedReader, actor []byte) *Reader {
+func NewReader(v uint64, vr sdkstore.VersionedReader, actor []byte) *Reader {
 	return &Reader{
 		version: v,
 		vReader: vr,

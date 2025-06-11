@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/SaharaLabsAI/sahara-store/core/appmodule"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/appmodule"
 )
 
 // RawJSONTarget returns a struct which encapsulates a genesis target that is

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/SaharaLabsAI/sahara-store/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 var _ store.KVStoreService = (*kvStoreService)(nil)

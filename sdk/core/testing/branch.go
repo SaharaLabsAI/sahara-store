@@ -3,7 +3,7 @@ package coretesting
 import (
 	"context"
 
-	"github.com/SaharaLabsAI/sahara-store/core/branch"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/branch"
 )
 
 var _ branch.Service = &TestBranchService{}

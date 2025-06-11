@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/SaharaLabsAI/sahara-store/core/transaction"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/transaction"
 )
 
 // InterfaceRegistry defines the interface for resolving interfaces

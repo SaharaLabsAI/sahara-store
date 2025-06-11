@@ -6,9 +6,9 @@ import (
 	iavl "github.com/cosmos/iavl/v2/tree"
 	ics23 "github.com/cosmos/ics23/go"
 
-	"github.com/SaharaLabsAI/sahara-store/commitment"
-	"github.com/SaharaLabsAI/sahara-store/core/log"
-	"github.com/SaharaLabsAI/sahara-store/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/log"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 var _ commitment.CompatV1Tree = &ImmutableTree{}

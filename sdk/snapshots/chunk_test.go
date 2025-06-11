@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/SaharaLabsAI/sahara-store/snapshots"
+	"github.com/SaharaLabsAI/sahara-store/sdk/snapshots"
 )
 
 func TestChunkWriter(t *testing.T) {

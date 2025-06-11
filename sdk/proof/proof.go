@@ -6,7 +6,7 @@ import (
 	ics23 "github.com/cosmos/ics23/go"
 
 	"cosmossdk.io/errors/v2"
-	storeerrors "github.com/SaharaLabsAI/sahara-store/errors"
+	storeerrors "github.com/SaharaLabsAI/sahara-store/sdk/errors"
 )
 
 // Proof operation types

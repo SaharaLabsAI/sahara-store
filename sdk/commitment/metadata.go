@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store/internal/encoding"
-	"github.com/SaharaLabsAI/sahara-store/proof"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/internal/encoding"
+	"github.com/SaharaLabsAI/sahara-store/sdk/proof"
 )
 
 const (

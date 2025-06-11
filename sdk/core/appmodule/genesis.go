@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 
-	appmodulev2 "github.com/SaharaLabsAI/sahara-store/core/appmodule/v2"
+	appmodulev2 "github.com/SaharaLabsAI/sahara-store/sdk/core/appmodule/v2"
 )
 
 // HasGenesisBasics is the legacy interface for stateless genesis methods.

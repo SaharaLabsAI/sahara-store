@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 func TestChangesetMarshal(t *testing.T) {

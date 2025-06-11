@@ -10,9 +10,9 @@ import (
 	"github.com/cockroachdb/pebble"
 	"github.com/spf13/cast"
 
-	coreserver "github.com/SaharaLabsAI/sahara-store/core/server"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
-	storeerrors "github.com/SaharaLabsAI/sahara-store/errors"
+	coreserver "github.com/SaharaLabsAI/sahara-store/sdk/core/server"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	storeerrors "github.com/SaharaLabsAI/sahara-store/sdk/errors"
 )
 
 var _ corestore.KVStoreWithBatch = (*PebbleDB)(nil)

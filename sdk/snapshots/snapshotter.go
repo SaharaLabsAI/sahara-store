@@ -3,7 +3,7 @@ package snapshots
 import (
 	protoio "github.com/cosmos/gogoproto/io"
 
-	"github.com/SaharaLabsAI/sahara-store/snapshots/types"
+	"github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 )
 
 // CommitSnapshotter defines an API for creating and restoring snapshots of the

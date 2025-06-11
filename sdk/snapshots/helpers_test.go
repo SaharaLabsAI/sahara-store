@@ -14,9 +14,9 @@ import (
 	protoio "github.com/cosmos/gogoproto/io"
 	"github.com/stretchr/testify/require"
 
-	coretesting "github.com/SaharaLabsAI/sahara-store/core/testing"
-	"github.com/SaharaLabsAI/sahara-store/snapshots"
-	snapshotstypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
+	coretesting "github.com/SaharaLabsAI/sahara-store/sdk/core/testing"
+	"github.com/SaharaLabsAI/sahara-store/sdk/snapshots"
+	snapshotstypes "github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 )
 
 func checksums(slice [][]byte) [][]byte {

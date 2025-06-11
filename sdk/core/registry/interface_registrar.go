@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"github.com/SaharaLabsAI/sahara-store/core/transaction"
+	"github.com/SaharaLabsAI/sahara-store/sdk/core/transaction"
 )
 
 // InterfaceRegistrar is an interface for registering interfaces and their implementation.

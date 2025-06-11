@@ -27,14 +27,14 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	protoio "github.com/cosmos/gogoproto/io"
 
-	store "github.com/SaharaLabsAI/sahara-store"
-	coretypes "github.com/SaharaLabsAI/sahara-store/core/store"
-	"github.com/SaharaLabsAI/sahara-store/root"
+	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
+	coretypes "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/root"
 
-	commstore "github.com/SaharaLabsAI/sahara-store/commitment"
-	commsnapshottypes "github.com/SaharaLabsAI/sahara-store/snapshots/types"
+	commstore "github.com/SaharaLabsAI/sahara-store/sdk/commitment"
+	commsnapshottypes "github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 
-	compatiavl "github.com/SaharaLabsAI/sahara-store/compatv1/iavl"
+	compatiavl "github.com/SaharaLabsAI/sahara-store/iavl"
 )
 
 var (
@@ -46,7 +46,7 @@ var (
 type Store struct {
 	logger log.Logger
 
-	root                   store.RootStore
+	root                   sdkstore.RootStore
 	snapshotPruningManager *pruning.Manager
 
 	keysByName map[string]types.StoreKey
@@ -76,7 +76,7 @@ func DefaultStoreOption() StoreOption {
 	}
 }
 
-func NewStore(logger log.Logger, root store.RootStore, db db.DB, opt StoreOption) *Store {
+func NewStore(logger log.Logger, root sdkstore.RootStore, db db.DB, opt StoreOption) *Store {
 	return &Store{
 		logger: logger,
 
@@ -128,7 +128,7 @@ func (s *Store) CacheMultiStoreWithVersion(version int64) (types.CacheMultiStore
 	}
 
 	eg := errgroup.Group{}
-	eg.SetLimit(store.MaxWriteParallelism)
+	eg.SetLimit(sdkstore.MaxWriteParallelism)
 
 	var lock sync.Mutex
 
@@ -269,19 +269,19 @@ func (s *Store) GetPruning() pruningtypes.PruningOptions {
 	opt := s.root.GetPruningOption()
 
 	switch opt.KeepRecent {
-	case store.NewPruningOption(store.PruningDefault).KeepRecent:
+	case sdkstore.NewPruningOption(sdkstore.PruningDefault).KeepRecent:
 		return pruningtypes.PruningOptions{
 			KeepRecent: opt.KeepRecent,
 			Interval:   opt.Interval,
 			Strategy:   pruningtypes.PruningDefault,
 		}
-	case store.NewPruningOption(store.PruningEverything).KeepRecent:
+	case sdkstore.NewPruningOption(sdkstore.PruningEverything).KeepRecent:
 		return pruningtypes.PruningOptions{
 			KeepRecent: opt.KeepRecent,
 			Interval:   opt.Interval,
 			Strategy:   pruningtypes.PruningEverything,
 		}
-	case store.NewPruningOption(store.PruningNothing).KeepRecent:
+	case sdkstore.NewPruningOption(sdkstore.PruningNothing).KeepRecent:
 		return pruningtypes.PruningOptions{
 			KeepRecent: opt.KeepRecent,
 			Interval:   opt.Interval,
@@ -354,7 +354,7 @@ func (s *Store) LoadLatestVersion() error {
 	}
 
 	eg := errgroup.Group{}
-	eg.SetLimit(store.MaxWriteParallelism)
+	eg.SetLimit(sdkstore.MaxWriteParallelism)
 
 	s.logger.Warn("preload store kvs")
 	for key, store := range s.stores {
@@ -609,7 +609,7 @@ func (s *Store) SetMetrics(metrics metrics.StoreMetrics) {
 
 // SetPruning implements types.CommitMultiStore.
 func (s *Store) SetPruning(opt pruningtypes.PruningOptions) {
-	s.root.SetPruningOption(store.PruningOption{
+	s.root.SetPruningOption(sdkstore.PruningOption{
 		KeepRecent: opt.KeepRecent,
 		Interval:   opt.Interval,
 	})
@@ -767,7 +767,7 @@ func (s *Store) WorkingHash() []byte {
 	storeInfos := make([]types.StoreInfo, 0, len(s.stores))
 
 	eg := errgroup.Group{}
-	eg.SetLimit(store.MaxWriteParallelism)
+	eg.SetLimit(sdkstore.MaxWriteParallelism)
 
 	var lock sync.Mutex
 

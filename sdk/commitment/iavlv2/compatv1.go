@@ -1,8 +1,8 @@
 package iavlv2
 
 import (
-	"github.com/SaharaLabsAI/sahara-store/commitment"
-	corestore "github.com/SaharaLabsAI/sahara-store/core/store"
+	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
+	corestore "github.com/SaharaLabsAI/sahara-store/sdk/core/store"
 )
 
 var (
