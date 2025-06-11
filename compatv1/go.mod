@@ -8,7 +8,7 @@ replace (
 	github.com/SaharaLabsAI/sahara-store => ../
 	github.com/SaharaLabsAI/sahara-store/core => ../core
 	github.com/SaharaLabsAI/sahara-store/core/testing => ../core/testing
-	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.0.2-beta
+	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.2.0-beta
 )
 
 require (
@@ -62,7 +62,6 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gogogateway v1.2.0 // indirect
 	github.com/cosmos/iavl v1.2.2 // indirect
-	github.com/cosmos/iavl-bench/bench v0.0.4 // indirect
 	github.com/cosmos/ics23/go v0.11.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.14.0 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
@@ -172,6 +171,7 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.5.1 // indirect
+	lukechampine.com/blake3 v1.4.1 // indirect
 	nhooyr.io/websocket v1.8.6 // indirect
 	pgregory.net/rapid v1.1.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
