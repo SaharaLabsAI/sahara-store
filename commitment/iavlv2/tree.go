@@ -36,7 +36,7 @@ func NewTree(
 	log log.Logger,
 ) (*Tree, error) {
 	pool := iavlnodepool.NewNodePool()
-	sql, err := iavlsql.NewSqliteDb(dbOptions)
+	sql, err := iavlsql.NewDB(dbOptions)
 	if err != nil {
 		return nil, err
 	}
