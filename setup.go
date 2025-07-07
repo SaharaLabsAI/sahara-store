@@ -96,8 +96,8 @@ func setup(
 			WarmCacheOnStart: ctx.WarmCacheOnStart,
 			LRUSize: map[string]int{
 				"staking": 2000,
-				"bank":    100_000,
-				"acc":     100_000,
+				"bank":    30_000,
+				"acc":     30_000,
 			},
 		}
 		cms := rootmulti.NewStore(ctx.Logger, store, ctx.Db, cmsOpt)

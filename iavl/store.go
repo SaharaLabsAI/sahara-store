@@ -34,7 +34,7 @@ var (
 	_ types.Queryable     = (*Store)(nil)
 )
 
-const lruCacheSize = 50_000
+const lruCacheSize = 20_000
 const warnLeavesSize = 100_000
 
 type Store struct {
