@@ -7,7 +7,7 @@ toolchain go1.23.5
 replace (
 	github.com/SaharaLabsAI/sahara-store/sdk/core => ./core
 	github.com/SaharaLabsAI/sahara-store/sdk/core/testing => ./core/testing
-	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.2.0-beta.2
+	github.com/cosmos/iavl/v2 => github.com/SaharaLabsAI/iavl/v2 v2.2.0-beta.3
 )
 
 require (
