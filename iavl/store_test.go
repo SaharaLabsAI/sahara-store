@@ -10,9 +10,9 @@ import (
 	"cosmossdk.io/store/cachekv"
 	storemetrics "cosmossdk.io/store/metrics"
 	"cosmossdk.io/store/types"
-	"github.com/cosmos/iavl/v2/common/metrics"
-	iavl2sql "github.com/cosmos/iavl/v2/db/sqlite"
-	iavl2 "github.com/cosmos/iavl/v2/tree"
+	"github.com/SaharaLabsAI/iavl/v2/common/metrics"
+	iavl2sql "github.com/SaharaLabsAI/iavl/v2/db/sqlite"
+	iavl2 "github.com/SaharaLabsAI/iavl/v2/tree"
 
 	commiavl "github.com/SaharaLabsAI/sahara-store/sdk/commitment/iavlv2"
 	coretesting "github.com/SaharaLabsAI/sahara-store/sdk/core/testing"

@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
-	iavl "github.com/cosmos/iavl/v2/tree"
+	iavlsql "github.com/SaharaLabsAI/iavl/v2/db/sqlite"
+	iavl "github.com/SaharaLabsAI/iavl/v2/tree"
 
 	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
 	"github.com/SaharaLabsAI/sahara-store/sdk/commitment/iavlv2"

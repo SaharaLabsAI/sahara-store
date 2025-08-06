@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
-	iavl "github.com/cosmos/iavl/v2/tree"
+	iavlsql "github.com/SaharaLabsAI/iavl/v2/db/sqlite"
+	iavl "github.com/SaharaLabsAI/iavl/v2/tree"
 
 	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
 	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"

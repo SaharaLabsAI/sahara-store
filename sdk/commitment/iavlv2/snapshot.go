@@ -3,7 +3,7 @@ package iavlv2
 import (
 	"errors"
 
-	iavl "github.com/cosmos/iavl/v2/tree"
+	iavl "github.com/SaharaLabsAI/iavl/v2/tree"
 
 	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
 	snapshotstypes "github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"

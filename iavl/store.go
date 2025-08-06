@@ -15,8 +15,8 @@ import (
 	"cosmossdk.io/store/tracekv"
 	"cosmossdk.io/store/types"
 
-	iavlsql "github.com/cosmos/iavl/v2/db/sqlite"
-	iavl2 "github.com/cosmos/iavl/v2/tree"
+	iavlsql "github.com/SaharaLabsAI/iavl/v2/db/sqlite"
+	iavl2 "github.com/SaharaLabsAI/iavl/v2/tree"
 
 	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
 	commstore "github.com/SaharaLabsAI/sahara-store/sdk/commitment"

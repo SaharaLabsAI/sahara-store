@@ -9,8 +9,8 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	iavl2sql "github.com/cosmos/iavl/v2/db/sqlite"
-	iavl2 "github.com/cosmos/iavl/v2/tree"
+	iavl2sql "github.com/SaharaLabsAI/iavl/v2/db/sqlite"
+	iavl2 "github.com/SaharaLabsAI/iavl/v2/tree"
 
 	sdkstore "github.com/SaharaLabsAI/sahara-store/sdk"
 	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"

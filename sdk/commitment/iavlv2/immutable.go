@@ -3,7 +3,7 @@ package iavlv2
 import (
 	"fmt"
 
-	iavl "github.com/cosmos/iavl/v2/tree"
+	iavl "github.com/SaharaLabsAI/iavl/v2/tree"
 	ics23 "github.com/cosmos/ics23/go"
 
 	"github.com/SaharaLabsAI/sahara-store/sdk/commitment"
