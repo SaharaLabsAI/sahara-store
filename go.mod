@@ -20,7 +20,7 @@ require (
 	github.com/SaharaLabsAI/sahara-store/sdk/core/testing v0.0.0-20250806132608-4cd06423f331
 	github.com/cometbft/cometbft v0.38.17
 	github.com/cosmos/cosmos-db v1.1.1
-	github.com/cosmos/cosmos-sdk v0.50.13
+	github.com/cosmos/cosmos-sdk v0.50.14
 	github.com/cosmos/gogoproto v1.7.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/stretchr/testify v1.10.0
