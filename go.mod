@@ -14,7 +14,7 @@ require (
 	cosmossdk.io/errors v1.0.1
 	cosmossdk.io/log v1.5.0
 	cosmossdk.io/store v1.1.1
-	github.com/SaharaLabsAI/iavl/v2 v2.2.0-beta.5
+	github.com/SaharaLabsAI/iavl/v2 v2.2.0-beta.6
 	github.com/SaharaLabsAI/sahara-store/sdk v0.0.0-20250806132608-4cd06423f331
 	github.com/SaharaLabsAI/sahara-store/sdk/core v0.0.0-20250806132608-4cd06423f331
 	github.com/SaharaLabsAI/sahara-store/sdk/core/testing v0.0.0-20250806132608-4cd06423f331
