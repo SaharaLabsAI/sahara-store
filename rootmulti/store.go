@@ -593,6 +593,10 @@ func (s *Store) SetIAVLDisableFastNode(_ bool) {
 	// Not applicable to iavl2
 }
 
+func (s *Store) SetIAVLSyncPruning(_ bool) {
+	// Not applicable to iavl2
+}
+
 // SetInitialVersion implements types.CommitMultiStore.
 func (s *Store) SetInitialVersion(version int64) error {
 	return s.root.SetInitialVersion(uint64(version))
