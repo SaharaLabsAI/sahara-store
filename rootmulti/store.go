@@ -35,6 +35,7 @@ import (
 	commsnapshottypes "github.com/SaharaLabsAI/sahara-store/sdk/snapshots/types"
 
 	compatiavl "github.com/SaharaLabsAI/sahara-store/iavl"
+	"github.com/cometbft/cometbft/proto/tendermint/crypto"
 )
 
 var (
@@ -824,11 +825,35 @@ func (s *Store) Query(req *types.RequestQuery) (*types.ResponseQuery, error) {
 		return nil, err
 	}
 
-	storeKey := s.keysByName[storeName]
-	store := s.stores[storeKey]
-
 	req.Path = subpath
-	return store.(*compatiavl.Store).Query(req)
+
+	resp, err := s.root.Query([]byte(storeName), uint64(req.Height), req.Data, req.Prove)
+	if err != nil {
+		return nil, err
+	}
+
+	proofOps := &crypto.ProofOps{
+		Ops: make([]crypto.ProofOp, 0),
+	}
+
+	for _, op := range resp.ProofOps {
+		bz, err := op.Proof.Marshal()
+		if err != nil {
+			panic(err.Error())
+		}
+		proofOps.Ops = append(proofOps.Ops, crypto.ProofOp{
+			Type: op.Type,
+			Key:  op.Key,
+			Data: bz,
+		})
+	}
+
+	return &types.ResponseQuery{
+		Key:      req.Data,
+		Value:    resp.Value,
+		Height:   int64(resp.Version),
+		ProofOps: proofOps,
+	}, nil
 }
 
 func (rs *Store) StoreKeysByName() map[string]types.StoreKey {
